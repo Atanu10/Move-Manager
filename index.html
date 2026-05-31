@@ -969,6 +969,97 @@ tbody tr:hover td { background: var(--surface); }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+/* ── MOBILE DRAWER OVERLAY ── */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.drawer-overlay.open { opacity: 1; }
+
+/* ── HAMBURGER ── */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--surface3);
+  background: var(--white);
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--ink2);
+  flex-shrink: 0;
+}
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--white);
+  border-top: 1px solid var(--surface3);
+  z-index: 90;
+  padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+}
+.bottom-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.bn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--ink3);
+  border-radius: var(--radius-sm);
+  transition: color 0.15s;
+  min-width: 52px;
+}
+.bn-item.active { color: var(--violet); }
+.bn-item i { font-size: 18px; }
+.bn-item span { font-size: 10px; font-weight: 500; font-family: 'Inter', sans-serif; }
+.bn-more { position: relative; }
+.bn-more-menu {
+  display: none;
+  position: fixed;
+  bottom: 70px;
+  right: 8px;
+  background: var(--white);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+  z-index: 200;
+  overflow: hidden;
+}
+.bn-more-menu.open { display: block; }
+.bn-more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  font-size: 14px;
+  color: var(--ink2);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  border-bottom: 0.5px solid var(--surface2);
+  transition: background 0.12s;
+}
+.bn-more-item:last-child { border-bottom: none; }
+.bn-more-item:hover { background: var(--surface); }
+.bn-more-item.active { color: var(--violet); font-weight: 600; }
+.bn-more-item i { width: 18px; text-align: center; color: var(--ink3); font-size: 15px; }
+.bn-more-item.active i { color: var(--violet); }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .sidebar { width: 220px; }
@@ -979,16 +1070,60 @@ tbody tr:hover td { background: var(--surface); }
 }
 
 @media (max-width: 640px) {
-  .sidebar { width: 0; overflow: hidden; }
-  .main { margin-left: 0; }
-  .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  /* Sidebar becomes a slide-in drawer */
+  .sidebar {
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .drawer-overlay { display: block; pointer-events: none; }
+  .drawer-overlay.open { pointer-events: all; }
+
+  /* Main takes full width */
+  .main { margin-left: 0; padding-bottom: 70px; }
+
+  /* Topbar adjustments */
+  .topbar { padding: 0 14px; height: 56px; }
+  .topbar-title { font-size: 19px; }
+  .hamburger { display: flex; }
+
+  /* Content padding */
+  .content { padding: 16px 14px; }
+
+  /* Grids go single column */
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+
+  /* Show bottom nav */
+  .bottom-nav { display: block; }
+
+  /* Tabs scroll horizontally */
+  .tabs { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+
+  /* Topbar actions — hide text labels on small screens */
+  .topbar-actions .btn span { display: none; }
+  .section-header { flex-wrap: wrap; gap: 8px; }
+
+  /* Modals full-screen on mobile */
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    margin: auto 0 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .modal-overlay { align-items: flex-end; }
 }
 </style>
 </head>
 <body>
 <div class="app">
+  <!-- MOBILE DRAWER OVERLAY -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeSidebar()"></div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-inner">
         <div class="logo-icon"><i class="fa-solid fa-boxes-packing"></i></div>
@@ -996,6 +1131,7 @@ tbody tr:hover td { background: var(--surface); }
           <h1>MovePlan</h1>
           <p>Your move, organised</p>
         </div>
+        <button onclick="closeSidebar()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.35);font-size:18px;cursor:pointer;padding:4px;display:none;" id="sidebar-close"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
     <nav class="nav">
@@ -1038,10 +1174,14 @@ tbody tr:hover td { background: var(--surface); }
   <main class="main">
     <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
-      <div class="topbar"><span class="topbar-title">Dashboard</span>
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div>
+          <span class="topbar-title">Dashboard</span></div>
+        </div>
         <div class="topbar-actions">
           <span class="text-muted text-sm" id="move-date-display"></span>
-          <button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> Set Move Date</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> <span>Set Move Date</span></button>
         </div>
       </div>
       <div class="content">
@@ -1057,9 +1197,9 @@ tbody tr:hover td { background: var(--surface); }
           </div>
         </div>
         <div class="grid-2 mt-2">
-          <div class="card">
-            <div class="section-header"><h2>Move countdown</h2></div>
-            <div id="dash-countdown" style="text-align:center;padding:20px 0;"></div>
+          <div class="card" id="countdown-card" style="overflow:hidden;position:relative;">
+            <div class="section-header"><h2>Move countdown</h2><span id="countdown-move-date" style="font-size:12px;color:var(--ink3);"></span></div>
+            <div id="dash-countdown" style="text-align:center;padding:8px 0 16px;"></div>
           </div>
           <div class="card">
             <div class="section-header"><h2>Packing progress</h2></div>
@@ -1071,7 +1211,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- CHECKLIST -->
     <div id="page-checklist" class="page">
-      <div class="topbar"><span class="topbar-title">Master Checklist</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Master Checklist</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-task')"><i class="fa-solid fa-plus"></i> Add Task</button>
       </div>
       <div class="content">
@@ -1089,7 +1229,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- TIMELINE -->
     <div id="page-timeline" class="page">
-      <div class="topbar"><span class="topbar-title">Move Timeline</span></div>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Move Timeline</span></div></div>
       <div class="content">
         <div class="grid-2">
           <div class="card"><div id="timeline-content"></div></div>
@@ -1103,7 +1243,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- BUDGET -->
     <div id="page-budget" class="page">
-      <div class="topbar"><span class="topbar-title">Budget Tracker</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Budget Tracker</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-expense')"><i class="fa-solid fa-plus"></i> Add Expense</button>
       </div>
       <div class="content">
@@ -1132,7 +1272,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- QUOTES -->
     <div id="page-quotes" class="page">
-      <div class="topbar"><span class="topbar-title">Removal Quotes</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Removal Quotes</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-quote')"><i class="fa-solid fa-plus"></i> Add Quote</button>
       </div>
       <div class="content">
@@ -1145,7 +1285,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- BOXES -->
     <div id="page-boxes" class="page">
-      <div class="topbar"><span class="topbar-title">Box Tracker</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Box Tracker</span>
         <div class="topbar-actions">
           <span class="text-muted text-sm" id="box-count-display"></span>
           <button class="btn btn-secondary" onclick="openModal('modal-item-search')"><i class="fa-solid fa-magnifying-glass"></i> Find Item</button>
@@ -1171,7 +1311,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- INVENTORY -->
     <div id="page-inventory" class="page">
-      <div class="topbar"><span class="topbar-title">Inventory</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Inventory</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-item')"><i class="fa-solid fa-plus"></i> Add Item</button>
       </div>
       <div class="content">
@@ -1190,7 +1330,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- ADDRESSES -->
     <div id="page-addresses" class="page">
-      <div class="topbar"><span class="topbar-title">Address Changes</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Address Changes</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-addr')"><i class="fa-solid fa-plus"></i> Add Organisation</button>
       </div>
       <div class="content">
@@ -1218,7 +1358,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- UTILITIES -->
     <div id="page-utilities" class="page">
-      <div class="topbar"><span class="topbar-title">Utilities & Services</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Utilities & Services</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-utility')"><i class="fa-solid fa-plus"></i> Add Utility</button>
       </div>
       <div class="content">
@@ -1228,7 +1368,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- CONTACTS -->
     <div id="page-contacts" class="page">
-      <div class="topbar"><span class="topbar-title">Key Contacts</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Key Contacts</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-contact')"><i class="fa-solid fa-plus"></i> Add Contact</button>
       </div>
       <div class="content">
@@ -1238,7 +1378,7 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- NOTES -->
     <div id="page-notes" class="page">
-      <div class="topbar"><span class="topbar-title">Notes</span>
+      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Notes</span></div>
         <button class="btn btn-primary" onclick="openModal('modal-note')"><i class="fa-solid fa-plus"></i> Add Note</button>
       </div>
       <div class="content">
@@ -1246,6 +1386,36 @@ tbody tr:hover td { background: var(--surface); }
       </div>
     </div>
   </main>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="bn-item active" id="bn-dashboard" onclick="showPage('dashboard');setBnActive('dashboard')">
+        <i class="fa-solid fa-house-chimney"></i><span>Home</span>
+      </div>
+      <div class="bn-item" id="bn-checklist" onclick="showPage('checklist');setBnActive('checklist')">
+        <i class="fa-solid fa-list-check"></i><span>Tasks</span>
+      </div>
+      <div class="bn-item" id="bn-boxes" onclick="showPage('boxes');setBnActive('boxes')">
+        <i class="fa-solid fa-box"></i><span>Boxes</span>
+      </div>
+      <div class="bn-item" id="bn-budget" onclick="showPage('budget');setBnActive('budget')">
+        <i class="fa-solid fa-sterling-sign"></i><span>Budget</span>
+      </div>
+      <div class="bn-item bn-more" id="bn-more" onclick="toggleMoreMenu()">
+        <i class="fa-solid fa-ellipsis"></i><span>More</span>
+        <div class="bn-more-menu" id="bn-more-menu">
+          <div class="bn-more-item" onclick="showPage('timeline');setBnActive('timeline');closeMoreMenu()"><i class="fa-solid fa-calendar-days"></i> Timeline</div>
+          <div class="bn-more-item" onclick="showPage('quotes');setBnActive('quotes');closeMoreMenu()"><i class="fa-solid fa-truck-moving"></i> Removal Quotes</div>
+          <div class="bn-more-item" onclick="showPage('inventory');setBnActive('inventory');closeMoreMenu()"><i class="fa-solid fa-clipboard-list"></i> Inventory</div>
+          <div class="bn-more-item" onclick="showPage('addresses');setBnActive('addresses');closeMoreMenu()"><i class="fa-solid fa-envelope"></i> Address Changes</div>
+          <div class="bn-more-item" onclick="showPage('utilities');setBnActive('utilities');closeMoreMenu()"><i class="fa-solid fa-bolt"></i> Utilities</div>
+          <div class="bn-more-item" onclick="showPage('contacts');setBnActive('contacts');closeMoreMenu()"><i class="fa-solid fa-address-book"></i> Key Contacts</div>
+          <div class="bn-more-item" onclick="showPage('notes');setBnActive('notes');closeMoreMenu()"><i class="fa-solid fa-note-sticky"></i> Notes</div>
+        </div>
+      </div>
+    </div>
+  </nav>
 </div>
 
 <!-- MODALS -->
@@ -1688,15 +1858,15 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const mapping = {
-    dashboard:'Dashboard',checklist:'Master Checklist',timeline:'Move Timeline',
-    budget:'Budget Tracker',quotes:'Removal Quotes',boxes:'Box Tracker',
-    inventory:'Inventory',addresses:'Address Changes',utilities:'Utilities & Services',
-    contacts:'Key Contacts',notes:'Notes'
-  };
   document.querySelectorAll('.nav-item').forEach(n => {
     if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
   });
+  // Sync bottom nav
+  document.querySelectorAll('.bn-item').forEach(el => el.classList.remove('active'));
+  const bn = document.getElementById('bn-'+id);
+  if (bn) bn.classList.add('active');
+  else { const more = document.getElementById('bn-more'); if(more) more.classList.add('active'); }
+  closeSidebar();
   renderPage(id);
 }
 function renderPage(id) {
@@ -1785,13 +1955,115 @@ function renderDashboard() {
       </div>
     </div>`).join('') + `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--surface2);display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Total spent</span><strong>£${budSpent.toLocaleString()}</strong></div>`;
   // Countdown
+  // ── Countdown ──
   const cd = document.getElementById('dash-countdown');
-  if(db.moveDate) {
-    const diff = Math.ceil((new Date(db.moveDate)-new Date())/(1000*86400));
-    cd.innerHTML = diff > 0 ? `<div class="countdown-number">${diff}</div><div style="font-size:15px;color:var(--ink3);margin-top:10px;font-weight:500;">days until moving day</div>` : `<div style="font-family:'Instrument Serif',serif;font-size:32px;color:var(--emerald);">You've moved! 🎉</div>`;
-  } else {
-    cd.innerHTML = `<div style="color:var(--ink3);font-size:14px;margin-bottom:12px;">Set your move date to see the countdown</div><button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> Set Date</button>`;
+  const cdCard = document.getElementById('countdown-card');
+  const cdDate = document.getElementById('countdown-move-date');
+  if (window._cdTicker) clearInterval(window._cdTicker);
+
+  if (!db.moveDate) {
+    if (cdCard) cdCard.style.background = '';
+    cd.innerHTML = `
+      <div style="color:var(--ink3);font-size:14px;margin-bottom:14px;">Set your move date to see the countdown</div>
+      <button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> Set Date</button>`;
+    return;
   }
+
+  function renderCountdown() {
+    const now = new Date();
+    const target = new Date(db.moveDate);
+    // Set target to start of that day
+    target.setHours(0,0,0,0);
+    const totalMs = target - now;
+    const diff = Math.ceil(totalMs / 86400000);
+
+    // Colour thresholds
+    let color, bgGrad, label, ringColor, textColor;
+    if (diff > 30) {
+      // Green — plenty of time
+      color = '#10b981'; bgGrad = 'linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)';
+      ringColor = '#10b981'; textColor = '#065f46'; label = 'Plenty of time';
+    } else if (diff > 14) {
+      // Amber — getting closer
+      color = '#f59e0b'; bgGrad = 'linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)';
+      ringColor = '#f59e0b'; textColor = '#92400e'; label = 'Getting closer';
+    } else if (diff > 7) {
+      // Orange — soon
+      color = '#f97316'; bgGrad = 'linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%)';
+      ringColor = '#f97316'; textColor = '#9a3412'; label = 'Coming up soon!';
+    } else if (diff > 0) {
+      // Red — imminent
+      color = '#f43f5e'; bgGrad = 'linear-gradient(135deg,#fff1f2 0%,#ffe4e6 100%)';
+      ringColor = '#f43f5e'; textColor = '#9f1239'; label = '🔥 Almost time!';
+    } else if (diff === 0) {
+      color = '#6366f1'; bgGrad = 'linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%)';
+      ringColor = '#6366f1'; textColor = '#3730a3'; label = 'Today is the day!';
+    } else {
+      // Moved!
+      if (cdCard) cdCard.style.background = '';
+      cd.innerHTML = `
+        <div style="font-family:'Instrument Serif',serif;font-size:36px;color:#10b981;margin-bottom:8px;">You've moved! 🎉</div>
+        <div style="font-size:13px;color:var(--ink3);">Congratulations on your new home</div>`;
+      if (cdDate) cdDate.textContent = '';
+      return;
+    }
+
+    // Apply card background
+    if (cdCard) cdCard.style.background = bgGrad;
+    if (cdDate) cdDate.textContent = new Date(db.moveDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+    // SVG ring — 200px circle, circumference = 2πr = 2π×80 ≈ 502.65
+    const maxDays = 90;
+    const pct = Math.max(0, Math.min(1, diff / maxDays));
+    const circ = 502.65;
+    const dash = pct * circ;
+    const gap = circ - dash;
+
+    // Hours / mins / secs for the sub-ticker
+    const hrs = Math.floor((totalMs % 86400000) / 3600000);
+    const mins = Math.floor((totalMs % 3600000) / 60000);
+    const secs = Math.floor((totalMs % 60000) / 1000);
+    const hh = String(Math.max(0,hrs)).padStart(2,'0');
+    const mm = String(Math.max(0,mins)).padStart(2,'0');
+    const ss = String(Math.max(0,secs)).padStart(2,'0');
+
+    cd.innerHTML = `
+      <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:200px;height:200px;margin:0 auto 16px;">
+        <svg width="200" height="200" viewBox="0 0 200 200" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="12"/>
+          <circle cx="100" cy="100" r="80" fill="none"
+            stroke="${ringColor}" stroke-width="12"
+            stroke-linecap="round"
+            stroke-dasharray="${dash} ${gap}"
+            style="transition:stroke-dasharray 0.8s ease,stroke 0.8s ease;"/>
+        </svg>
+        <div style="position:relative;text-align:center;">
+          <div style="font-family:'Instrument Serif',serif;font-size:62px;line-height:1;color:${textColor};font-weight:400;">${Math.max(0,diff)}</div>
+          <div style="font-size:13px;font-weight:600;color:${color};letter-spacing:0.3px;margin-top:2px;">DAYS</div>
+        </div>
+      </div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,0.06);border-radius:99px;padding:4px 14px;margin-bottom:12px;">
+        <span style="font-size:13px;font-weight:600;color:${textColor};">${label}</span>
+      </div>
+      <div id="cd-ticker" style="font-family:'Inter',monospace;font-size:18px;font-weight:500;color:${textColor};opacity:0.7;letter-spacing:2px;">${hh}:${mm}:${ss}</div>
+      <div style="font-size:11px;color:${textColor};opacity:0.5;margin-top:4px;">hours · mins · secs</div>
+    `;
+  }
+
+  renderCountdown();
+
+  // Live ticker — update every second
+  window._cdTicker = setInterval(() => {
+    const el = document.getElementById('cd-ticker');
+    if (!el) { clearInterval(window._cdTicker); return; }
+    const now = new Date();
+    const target = new Date(db.moveDate); target.setHours(0,0,0,0);
+    const ms = target - now;
+    const hrs = Math.floor((ms % 86400000) / 3600000);
+    const mins = Math.floor((ms % 3600000) / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    el.textContent = `${String(Math.max(0,hrs)).padStart(2,'0')}:${String(Math.max(0,mins)).padStart(2,'0')}:${String(Math.max(0,secs)).padStart(2,'0')}`;
+  }, 1000);
   // Packing
   const rooms = {};
   db.boxes.forEach(b=>{ if(!rooms[b.room]) rooms[b.room]={total:0,packed:0}; rooms[b.room].total++; if(b.status==='packed') rooms[b.room].packed++; });
@@ -2580,6 +2852,62 @@ window.openModal = function(id, data) {
     setTimeout(()=>{ const el=document.getElementById('item-search-input'); if(el) el.focus(); }, 80);
   }
 };
+
+// ===== MOBILE NAV =====
+function openSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('drawer-overlay');
+  const cl = document.getElementById('sidebar-close');
+  sb.classList.add('open');
+  ov.classList.add('open');
+  if (cl) cl.style.display = 'block';
+}
+function closeSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('drawer-overlay');
+  const cl = document.getElementById('sidebar-close');
+  sb.classList.remove('open');
+  ov.classList.remove('open');
+  if (cl) cl.style.display = 'none';
+}
+
+const BN_MAIN = ['dashboard','checklist','boxes','budget'];
+function setBnActive(id) {
+  // Update bottom nav active state
+  document.querySelectorAll('.bn-item').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('bn-' + id) || document.getElementById('bn-more');
+  if (target) target.classList.add('active');
+  // Update more menu items
+  document.querySelectorAll('.bn-more-item').forEach(el => el.classList.remove('active'));
+  if (!BN_MAIN.includes(id)) {
+    document.querySelectorAll('.bn-more-item').forEach(el => {
+      if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'"+id+"'")) el.classList.add('active');
+    });
+  }
+  closeSidebar();
+}
+
+function toggleMoreMenu() {
+  const menu = document.getElementById('bn-more-menu');
+  menu.classList.toggle('open');
+}
+function closeMoreMenu() {
+  document.getElementById('bn-more-menu').classList.remove('open');
+}
+
+// Close more menu when tapping elsewhere
+document.addEventListener('click', (e) => {
+  const more = document.getElementById('bn-more');
+  if (more && !more.contains(e.target)) closeMoreMenu();
+});
+
+// Show sidebar close button on mobile
+function checkMobile() {
+  const cl = document.getElementById('sidebar-close');
+  if (cl) cl.style.display = window.innerWidth <= 640 ? 'block' : 'none';
+}
+window.addEventListener('resize', checkMobile);
+checkMobile();
 
 // ===== INIT =====
 (async () => {
