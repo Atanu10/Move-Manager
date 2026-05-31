@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moving House Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --ink: #0f1117;
+  --ink2: #374151;
+  --ink3: #9ca3af;
+  --ink4: #d1d5db;
+  --surface: #f9fafb;
+  --surface2: #f3f4f6;
+  --surface3: #e5e7eb;
+  --white: #ffffff;
+
+  --violet: #6366f1;
+  --violet-light: #818cf8;
+  --violet-bg: #eef2ff;
+  --violet-border: #c7d2fe;
+
+  --emerald: #10b981;
+  --emerald-bg: #ecfdf5;
+  --emerald-border: #a7f3d0;
+
+  --amber: #f59e0b;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+
+  --rose: #f43f5e;
+  --rose-bg: #fff1f2;
+  --rose-border: #fecdd3;
+
+  --sky: #0ea5e9;
+  --sky-bg: #f0f9ff;
+  --sky-border: #bae6fd;
+
+  --teal: #14b8a6;
+  --teal-bg: #f0fdfa;
+  --teal-border: #99f6e4;
+
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-bg: #eef2ff;
+
+  --sidebar-bg: #0f1117;
+  --sidebar-hover: rgba(255,255,255,0.06);
+  --sidebar-active-bg: rgba(99,102,241,0.15);
+  --sidebar-active-border: #6366f1;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-violet: 0 4px 20px rgba(99,102,241,0.25);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+
+/* ── LAYOUT ── */
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 252px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-logo-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+  flex-shrink: 0;
+}
+
+.sidebar-logo h1 {
+  color: #fff;
+  font-size: 19px;
+  line-height: 1.1;
+  font-family: 'Instrument Serif', serif;
+}
+
+.sidebar-logo p {
+  color: rgba(255,255,255,0.32);
+  font-size: 10.5px;
+  margin-top: 2px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.4px;
+}
+
+.nav { padding: 10px 0; flex: 1; overflow-y: auto; }
+
+.nav-section {
+  padding: 16px 20px 5px;
+  color: rgba(255,255,255,0.2);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  margin: 1px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: rgba(255,255,255,0.5);
+  font-size: 13.5px;
+  font-weight: 400;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.nav-item:hover {
+  color: rgba(255,255,255,0.9);
+  background: var(--sidebar-hover);
+}
+
+.nav-item.active {
+  color: #fff;
+  background: var(--sidebar-active-bg);
+  font-weight: 500;
+}
+
+.nav-item.active .nav-dot {
+  background: var(--violet-light);
+  box-shadow: 0 0 8px rgba(99,102,241,0.6);
+}
+
+.nav-item i {
+  width: 16px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.nav-item.active i { opacity: 1; color: var(--violet-light); }
+
+.nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.sidebar-progress {
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin: 0 0 0 0;
+}
+
+.prog-label {
+  color: rgba(255,255,255,0.35);
+  font-size: 11px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Inter', sans-serif;
+}
+
+.prog-label span {
+  color: rgba(255,255,255,0.75);
+  font-weight: 600;
+}
+
+.prog-bar {
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  height: 5px;
+}
+
+.prog-fill {
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  border-radius: 99px;
+  height: 5px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 10px rgba(99,102,241,0.5);
+}
+
+/* ── MAIN ── */
+.main { margin-left: 252px; flex: 1; min-height: 100vh; background: var(--surface); }
+
+.topbar {
+  background: rgba(249,250,251,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--surface3);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.content { padding: 28px 32px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  box-shadow: var(--shadow-violet);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(99,102,241,0.35);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: var(--white);
+  color: var(--ink2);
+  border: 1px solid var(--surface3);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+  background: var(--surface2);
+  border-color: var(--ink4);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink3);
+  border: 1px solid var(--surface3);
+}
+
+.btn-ghost:hover {
+  background: var(--surface2);
+  color: var(--ink2);
+  border-color: var(--ink4);
+}
+
+.btn-danger {
+  background: var(--rose-bg);
+  color: var(--rose);
+  border: 1px solid var(--rose-border);
+}
+
+.btn-danger:hover { background: #ffe4e9; }
+
+.btn-sm { padding: 6px 13px; font-size: 12px; }
+.btn-icon { padding: 7px; width: 32px; height: 32px; justify-content: center; border-radius: var(--radius-sm); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-sm { padding: 16px 20px; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* ── STAT CARDS ── */
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.stat-card:hover::before { opacity: 1; }
+
+.stat-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ink3);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 30px;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.stat-sub { font-size: 11.5px; color: var(--ink3); margin-top: 5px; }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  font-family: 'Inter', sans-serif;
+}
+
+.badge-green { background: var(--emerald-bg); color: #059669; border: 1px solid var(--emerald-border); }
+.badge-amber { background: var(--amber-bg); color: #d97706; border: 1px solid var(--amber-border); }
+.badge-red { background: var(--rose-bg); color: #e11d48; border: 1px solid var(--rose-border); }
+.badge-blue { background: var(--sky-bg); color: #0284c7; border: 1px solid var(--sky-border); }
+.badge-gray { background: var(--surface2); color: var(--ink3); border: 1px solid var(--surface3); }
+.badge-teal { background: var(--teal-bg); color: #0d9488; border: 1px solid var(--teal-border); }
+.badge-violet { background: var(--violet-bg); color: #4f46e5; border: 1px solid var(--violet-border); }
+
+/* ── FORMS ── */
+.form-group { margin-bottom: 16px; }
+.form-row { display: grid; gap: 12px; }
+.form-row-2 { grid-template-columns: 1fr 1fr; }
+.form-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin-bottom: 6px;
+  letter-spacing: 0.1px;
+  font-family: 'Inter', sans-serif;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 9px 13px;
+  border: 1.5px solid var(--surface3);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  background: var(--white);
+  color: var(--ink);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+input:hover, select:hover, textarea:hover { border-color: var(--ink4); }
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+textarea { resize: vertical; min-height: 80px; }
+
+.input-prefix { position: relative; }
+.input-prefix span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink3); font-size: 13px; }
+.input-prefix input { padding-left: 28px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,17,23,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  width: 90%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(16px) scale(0.98);
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+  border: 1px solid var(--surface3);
+}
+
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-header {
+  padding: 24px 28px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--surface2);
+}
+
+.modal-header h2 { font-size: 22px; letter-spacing: -0.3px; }
+
+.modal-body { padding: 22px 28px; }
+
+.modal-footer {
+  padding: 16px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--surface2);
+  background: var(--surface);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; }
+
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--ink3);
+  font-weight: 700;
+  border-bottom: 2px solid var(--surface2);
+  font-family: 'Inter', sans-serif;
+  background: var(--surface);
+}
+
+thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+thead th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+
+tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--surface2);
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface); }
+
+/* ── CHECKLIST ── */
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s;
+}
+
+.checklist-item:hover { background: var(--surface); }
+.checklist-item.done .item-text { text-decoration: line-through; color: var(--ink3); }
+
+.checklist-item input[type=checkbox] {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  cursor: pointer;
+  margin-top: 2px;
+  accent-color: var(--violet);
+  border-radius: 4px;
+}
+
+.item-text { flex: 1; font-size: 14px; line-height: 1.5; }
+.item-meta { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface2);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.tab {
+  padding: 7px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink3);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.tab:hover:not(.active) { color: var(--ink2); background: rgba(255,255,255,0.5); }
+.tab.active { color: var(--ink); background: var(--white); box-shadow: var(--shadow-sm); font-weight: 600; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 { font-size: 19px; letter-spacing: -0.2px; }
+
+/* ── MISC ── */
+.divider { height: 1px; background: var(--surface2); margin: 20px 0; }
+
+.empty-state {
+  text-align: center;
+  padding: 52px 24px;
+  color: var(--ink3);
+}
+
+.empty-state i {
+  font-size: 36px;
+  margin-bottom: 14px;
+  display: block;
+  opacity: 0.2;
+}
+
+.empty-state p { font-size: 14px; color: var(--ink3); }
+
+.text-muted { color: var(--ink3); }
+.text-sm { font-size: 12px; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-2 { margin-bottom: 16px; }
+.flex { display: flex; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── PRIORITY DOT ── */
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-high { background: var(--rose); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); }
+.dot-med { background: var(--amber); box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
+.dot-low { background: var(--emerald); box-shadow: 0 0 0 2px rgba(16,185,129,0.15); }
+
+/* ── BOX GRID ── */
+.box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 14px;
+}
+
+.box-card {
+  background: var(--white);
+  border: 1.5px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.box-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--violet), #a5b4fc);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.box-card:hover {
+  border-color: var(--violet);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.12);
+  transform: translateY(-2px);
+}
+
+.box-card:hover::after { opacity: 1; }
+
+.box-card.packed {
+  border-color: var(--emerald-border);
+  background: var(--emerald-bg);
+}
+
+.box-card.packed::after {
+  background: linear-gradient(90deg, var(--emerald), #34d399);
+  opacity: 1;
+}
+
+.box-number {
+  font-family: 'Instrument Serif', serif;
+  font-size: 34px;
+  color: var(--violet);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.box-card.packed .box-number { color: var(--emerald); }
+
+.box-room { font-size: 12px; font-weight: 600; color: var(--ink2); }
+.box-items { font-size: 11px; color: var(--ink3); margin-top: 3px; line-height: 1.4; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 30px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px; top: 8px; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--violet), var(--surface3));
+  opacity: 0.4;
+}
+
+.timeline-item { position: relative; padding-bottom: 28px; }
+
+.timeline-dot {
+  position: absolute;
+  left: -26px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--surface3);
+  border: 3px solid var(--surface);
+  top: 0;
+  transition: all 0.2s;
+}
+
+.timeline-dot.done {
+  background: var(--emerald);
+  border-color: var(--emerald-bg);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+}
+
+.timeline-dot.active {
+  background: var(--violet);
+  border-color: var(--violet-bg);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+}
+
+.timeline-content h4 { font-size: 14px; font-weight: 600; color: var(--ink); font-family: 'Inter', sans-serif; }
+.timeline-content p { font-size: 12px; color: var(--ink3); margin-top: 3px; }
+
+/* ── ADDRESS / UTILITY ROWS ── */
+.addr-org {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+}
+
+.addr-org:hover { background: var(--surface); }
+
+.addr-icon {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--violet-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  color: var(--violet);
+  flex-shrink: 0;
+}
+
+.addr-body { flex: 1; min-width: 0; }
+.addr-name { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+.addr-note { font-size: 12px; color: var(--ink3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── QUOTE CARDS ── */
+.quote-card {
+  border: 2px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  background: var(--white);
+  transition: all 0.18s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.quote-card:hover { border-color: var(--violet); box-shadow: var(--shadow); transform: translateY(-2px); }
+.quote-card.selected { border-color: var(--violet); background: var(--violet-bg); box-shadow: var(--shadow-violet); }
+
+.quote-company { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.2px; }
+
+.quote-price {
+  font-family: 'Instrument Serif', serif;
+  font-size: 34px;
+  color: var(--violet);
+  margin: 8px 0;
+  line-height: 1;
+}
+
+.quote-details { font-size: 12.5px; color: var(--ink3); }
+.quote-details li { margin-top: 6px; list-style: none; display: flex; gap: 8px; align-items: center; }
+.quote-details li::before { content: ''; width: 6px; height: 6px; background: var(--emerald); border-radius: 50%; flex-shrink: 0; }
+
+/* ── BUDGET ── */
+.budget-bar-wrap {
+  background: var(--surface2);
+  border-radius: 99px;
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.budget-bar {
+  height: 6px;
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+.budget-cat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--surface2);
+}
+
+.budget-cat:last-child { border-bottom: none; }
+
+/* ── BOX TAGS ── */
+.tag-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--surface3);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: text;
+  min-height: 42px;
+  align-items: center;
+  transition: all 0.15s;
+}
+
+.tag-input-wrap:focus-within {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--violet-bg);
+  color: #4f46e5;
+  border: 1px solid var(--violet-border);
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tag-pill button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #818cf8;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 0.1s;
+}
+
+.tag-pill button:hover { color: var(--rose); }
+
+.tag-input-bare {
+  border: none;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 2px 4px;
+  background: transparent;
+  min-width: 80px;
+  flex: 1;
+  color: var(--ink);
+}
+
+.box-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+
+.box-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: var(--violet-bg);
+  color: #4f46e5;
+  border-radius: 99px;
+  padding: 2px 8px;
+  border: 1px solid var(--violet-border);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── SEARCH RESULTS ── */
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s;
+}
+
+.search-result-item:hover { background: var(--surface); }
+
+.search-box-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+  white-space: nowrap;
+}
+
+.search-box-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+}
+
+/* ── CHECKLIST PHASE HEADER ── */
+.phase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  border-left: 3px solid var(--violet);
+}
+
+.phase-header h3 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: var(--ink2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── COUNTDOWN ── */
+.countdown-number {
+  font-family: 'Instrument Serif', serif;
+  font-size: 72px;
+  line-height: 1;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── CONTACT CARD ── */
+.contact-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px;
+  background: linear-gradient(135deg, #eef2ff, #c7d2fe);
+  color: #4f46e5;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── NOTE CARD ── */
+.note-card-accent {
+  width: 4px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom, #6366f1, #a5b4fc);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { width: 220px; }
+  .main { margin-left: 220px; }
+  .content { padding: 20px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .sidebar { width: 0; overflow: hidden; }
+  .main { margin-left: 0; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-inner">
+        <div class="logo-icon"><i class="fa-solid fa-boxes-packing"></i></div>
+        <div>
+          <h1>MovePlan</h1>
+          <p>Your move, organised</p>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><i class="fa-solid fa-house-chimney"></i> Dashboard <span class="nav-dot"></span></div>
+      <div class="nav-section">Planning</div>
+      <div class="nav-item" onclick="showPage('checklist')"><i class="fa-solid fa-list-check"></i> Checklist <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('timeline')"><i class="fa-solid fa-calendar-days"></i> Timeline <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('budget')"><i class="fa-solid fa-sterling-sign"></i> Budget <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('quotes')"><i class="fa-solid fa-truck-moving"></i> Removal Quotes <span class="nav-dot"></span></div>
+      <div class="nav-section">Packing</div>
+      <div class="nav-item" onclick="showPage('boxes')"><i class="fa-solid fa-box"></i> Box Tracker <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('inventory')"><i class="fa-solid fa-clipboard-list"></i> Inventory <span class="nav-dot"></span></div>
+      <div class="nav-section">Admin</div>
+      <div class="nav-item" onclick="showPage('addresses')"><i class="fa-solid fa-envelope"></i> Address Changes <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('utilities')"><i class="fa-solid fa-bolt"></i> Utilities <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('contacts')"><i class="fa-solid fa-address-book"></i> Key Contacts <span class="nav-dot"></span></div>
+      <div class="nav-item" onclick="showPage('notes')"><i class="fa-solid fa-note-sticky"></i> Notes <span class="nav-dot"></span></div>
+    </nav>
+    <div class="sidebar-progress">
+      <div class="prog-label">Overall progress <span id="overall-pct">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="overall-fill" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="topbar"><span class="topbar-title">Dashboard</span>
+        <div class="topbar-actions">
+          <span class="text-muted text-sm" id="move-date-display"></span>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> Set Move Date</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="grid-4 mb-2" id="dash-stats"></div>
+        <div class="grid-2 mt-2">
+          <div class="card">
+            <div class="section-header"><h2>Upcoming tasks</h2><button class="btn btn-ghost btn-sm" onclick="showPage('checklist')">View all</button></div>
+            <div id="dash-tasks"></div>
+          </div>
+          <div class="card">
+            <div class="section-header"><h2>Budget snapshot</h2><button class="btn btn-ghost btn-sm" onclick="showPage('budget')">View all</button></div>
+            <div id="dash-budget"></div>
+          </div>
+        </div>
+        <div class="grid-2 mt-2">
+          <div class="card">
+            <div class="section-header"><h2>Move countdown</h2></div>
+            <div id="dash-countdown" style="text-align:center;padding:20px 0;"></div>
+          </div>
+          <div class="card">
+            <div class="section-header"><h2>Packing progress</h2></div>
+            <div id="dash-packing"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div id="page-checklist" class="page">
+      <div class="topbar"><span class="topbar-title">Master Checklist</span>
+        <button class="btn btn-primary" onclick="openModal('modal-task')"><i class="fa-solid fa-plus"></i> Add Task</button>
+      </div>
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" onclick="filterChecklist('all',this)">All</div>
+          <div class="tab" onclick="filterChecklist('8weeks',this)">8+ Weeks</div>
+          <div class="tab" onclick="filterChecklist('4weeks',this)">4–8 Weeks</div>
+          <div class="tab" onclick="filterChecklist('2weeks',this)">1–4 Weeks</div>
+          <div class="tab" onclick="filterChecklist('moveday',this)">Move Day</div>
+          <div class="tab" onclick="filterChecklist('after',this)">After Move</div>
+        </div>
+        <div id="checklist-list"></div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="page-timeline" class="page">
+      <div class="topbar"><span class="topbar-title">Move Timeline</span></div>
+      <div class="content">
+        <div class="grid-2">
+          <div class="card"><div id="timeline-content"></div></div>
+          <div class="card">
+            <h2 class="mb-2" style="font-size:18px;">Move day checklist</h2>
+            <div id="moveday-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div id="page-budget" class="page">
+      <div class="topbar"><span class="topbar-title">Budget Tracker</span>
+        <button class="btn btn-primary" onclick="openModal('modal-expense')"><i class="fa-solid fa-plus"></i> Add Expense</button>
+      </div>
+      <div class="content">
+        <div class="grid-3 mb-2">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--violet-bg);color:var(--violet);"><i class="fa-solid fa-wallet"></i></div><div class="stat-label">Total Budget</div><div class="stat-value" id="bud-total">£0</div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--rose-bg);color:var(--rose);"><i class="fa-solid fa-arrow-trend-up"></i></div><div class="stat-label">Spent So Far</div><div class="stat-value" id="bud-spent" style="color:var(--rose)">£0</div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--emerald-bg);color:var(--emerald);"><i class="fa-solid fa-piggy-bank"></i></div><div class="stat-label">Remaining</div><div class="stat-value" id="bud-remain" style="color:var(--emerald)">£0</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-header"><h2>Expenses</h2></div>
+            <div id="expense-list"></div>
+          </div>
+          <div class="card">
+            <div class="section-header"><h2>By category</h2></div>
+            <div id="budget-breakdown"></div>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label>Total moving budget (£)</label>
+              <input type="number" id="budget-total-input" placeholder="e.g. 5000" oninput="saveBudgetTotal()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUOTES -->
+    <div id="page-quotes" class="page">
+      <div class="topbar"><span class="topbar-title">Removal Quotes</span>
+        <button class="btn btn-primary" onclick="openModal('modal-quote')"><i class="fa-solid fa-plus"></i> Add Quote</button>
+      </div>
+      <div class="content">
+        <div class="card mb-2">
+          <p class="text-muted text-sm">Compare removal company quotes side by side. Select the winning quote to record your decision.</p>
+        </div>
+        <div id="quotes-grid" class="grid-3"></div>
+      </div>
+    </div>
+
+    <!-- BOXES -->
+    <div id="page-boxes" class="page">
+      <div class="topbar"><span class="topbar-title">Box Tracker</span>
+        <div class="topbar-actions">
+          <span class="text-muted text-sm" id="box-count-display"></span>
+          <button class="btn btn-secondary" onclick="openModal('modal-item-search')"><i class="fa-solid fa-magnifying-glass"></i> Find Item</button>
+          <button class="btn btn-primary" onclick="openModal('modal-box')"><i class="fa-solid fa-plus"></i> Add Box</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="grid-4 mb-2" id="box-stats"></div>
+        <div class="card">
+          <div class="section-header">
+            <h2>All Boxes</h2>
+            <div class="flex gap-2 items-center">
+              <input type="text" id="box-tag-filter" placeholder="Filter by tag…" style="width:160px;" oninput="renderBoxes()">
+              <select id="box-filter" onchange="renderBoxes()" style="width:160px;">
+                <option value="">All rooms</option>
+              </select>
+            </div>
+          </div>
+          <div id="box-grid" class="box-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div id="page-inventory" class="page">
+      <div class="topbar"><span class="topbar-title">Inventory</span>
+        <button class="btn btn-primary" onclick="openModal('modal-item')"><i class="fa-solid fa-plus"></i> Add Item</button>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="section-header">
+            <h2>Items to move</h2>
+            <div class="flex gap-2">
+              <input type="text" id="inv-search" placeholder="Search items..." style="width:200px;" oninput="renderInventory()">
+              <select id="inv-filter-room" onchange="renderInventory()" style="width:150px;"><option value="">All rooms</option></select>
+            </div>
+          </div>
+          <div class="table-wrap"><div id="inventory-table"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADDRESSES -->
+    <div id="page-addresses" class="page">
+      <div class="topbar"><span class="topbar-title">Address Changes</span>
+        <button class="btn btn-primary" onclick="openModal('modal-addr')"><i class="fa-solid fa-plus"></i> Add Organisation</button>
+      </div>
+      <div class="content">
+        <div class="card mb-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <label style="display:block;font-size:12px;color:var(--ink3);margin-bottom:4px;">Old address</label>
+              <input type="text" id="old-addr" placeholder="Your current address" style="width:380px;" oninput="saveAddresses()">
+            </div>
+            <i class="fa-solid fa-arrow-right" style="font-size:20px;color:var(--surface3);"></i>
+            <div>
+              <label style="display:block;font-size:12px;color:var(--ink3);margin-bottom:4px;">New address</label>
+              <input type="text" id="new-addr" placeholder="Your new address" style="width:380px;" oninput="saveAddresses()">
+            </div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="filterAddr('all',this)">All (<span id="addr-cnt-all">0</span>)</div>
+          <div class="tab" onclick="filterAddr('pending',this)">Pending (<span id="addr-cnt-pending">0</span>)</div>
+          <div class="tab" onclick="filterAddr('done',this)">Done (<span id="addr-cnt-done">0</span>)</div>
+        </div>
+        <div class="card"><div id="addr-list"></div></div>
+      </div>
+    </div>
+
+    <!-- UTILITIES -->
+    <div id="page-utilities" class="page">
+      <div class="topbar"><span class="topbar-title">Utilities & Services</span>
+        <button class="btn btn-primary" onclick="openModal('modal-utility')"><i class="fa-solid fa-plus"></i> Add Utility</button>
+      </div>
+      <div class="content">
+        <div class="card"><div id="utility-list"></div></div>
+      </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div id="page-contacts" class="page">
+      <div class="topbar"><span class="topbar-title">Key Contacts</span>
+        <button class="btn btn-primary" onclick="openModal('modal-contact')"><i class="fa-solid fa-plus"></i> Add Contact</button>
+      </div>
+      <div class="content">
+        <div id="contacts-grid" class="grid-3"></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="page-notes" class="page">
+      <div class="topbar"><span class="topbar-title">Notes</span>
+        <button class="btn btn-primary" onclick="openModal('modal-note')"><i class="fa-solid fa-plus"></i> Add Note</button>
+      </div>
+      <div class="content">
+        <div id="notes-grid" class="grid-3"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<!-- Move Date -->
+<div id="modal-movedate" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2>Set Move Date</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-movedate')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Moving date</label><input type="date" id="move-date-input"></div>
+      <div class="form-group"><label>From address</label><input type="text" id="from-addr-modal" placeholder="Current property"></div>
+      <div class="form-group"><label>To address</label><input type="text" id="to-addr-modal" placeholder="New property"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-movedate')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMoveDate()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task -->
+<div id="modal-task" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="task-modal-title">Add Task</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-task')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="task-edit-id">
+      <div class="form-group"><label>Task name</label><input type="text" id="task-name" placeholder="e.g. Book removal company"></div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Phase</label>
+          <select id="task-phase">
+            <option value="8weeks">8+ Weeks before</option>
+            <option value="4weeks">4–8 Weeks before</option>
+            <option value="2weeks">1–4 Weeks before</option>
+            <option value="moveday">Move Day</option>
+            <option value="after">After Move</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Priority</label>
+          <select id="task-priority">
+            <option value="high">High</option>
+            <option value="med">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes (optional)</label><textarea id="task-notes" placeholder="Any details..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-task')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense -->
+<div id="modal-expense" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="exp-modal-title">Add Expense</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-expense')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="exp-edit-id">
+      <div class="form-group"><label>Description</label><input type="text" id="exp-desc" placeholder="e.g. Removal company deposit"></div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Amount (£)</label><input type="number" id="exp-amount" placeholder="0.00" step="0.01"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="exp-cat">
+            <option value="Removal">Removal</option>
+            <option value="Packing">Packing Supplies</option>
+            <option value="Legal">Legal / Solicitor</option>
+            <option value="Survey">Survey</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Cleaning">Cleaning</option>
+            <option value="Storage">Storage</option>
+            <option value="Home">Home Improvements</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Date</label><input type="date" id="exp-date"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="exp-status">
+            <option value="planned">Planned</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-expense')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quote -->
+<div id="modal-quote" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="quote-modal-title">Add Removal Quote</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-quote')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="quote-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Company name</label><input type="text" id="q-company" placeholder="e.g. Swift Removals"></div>
+        <div class="form-group"><label>Price (£)</label><input type="number" id="q-price" placeholder="0"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Includes packing?</label><select id="q-packing"><option value="yes">Yes</option><option value="no">No</option></select></div>
+        <div class="form-group"><label>Insurance included?</label><select id="q-insurance"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Crew size</label><input type="text" id="q-crew" placeholder="e.g. 3 people"></div>
+        <div class="form-group"><label>Number of vans</label><input type="text" id="q-vans" placeholder="e.g. 1 large van"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="q-notes" placeholder="Any terms, conditions, inclusions..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-quote')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuote()">Save Quote</button>
+    </div>
+  </div>
+</div>
+
+<!-- Box -->
+<div id="modal-box" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="box-modal-title">Add Box</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-box')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="box-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Room / Category</label><input type="text" id="box-room" placeholder="e.g. Kitchen, Bedroom 1"></div>
+        <div class="form-group"><label>Size</label><select id="box-size"><option value="Small">Small</option><option value="Medium">Medium</option><option value="Large">Large</option><option value="XL">XL</option></select></div>
+      </div>
+      <div class="form-group"><label>Contents summary</label><input type="text" id="box-contents" placeholder="e.g. Crockery, pans, utensils"></div>
+      <div class="form-group">
+        <label>Tags <span style="font-weight:400;color:var(--ink3);">— type and press Enter or comma to add</span></label>
+        <div class="tag-input-wrap" id="box-tag-wrap" onclick="document.getElementById('box-tag-input').focus()">
+          <input class="tag-input-bare" id="box-tag-input" placeholder="e.g. Kitchen, Fragile, Living Room…" onkeydown="handleTagKey(event)" oninput="handleTagInput(event)">
+        </div>
+        <input type="hidden" id="box-tags-hidden">
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Fragile?</label><select id="box-fragile"><option value="no">No</option><option value="yes">Yes — Handle with care</option></select></div>
+        <div class="form-group"><label>Status</label><select id="box-status"><option value="empty">Empty</option><option value="partial">Partially packed</option><option value="packed">Packed</option></select></div>
+      </div>
+      <div class="form-group"><label>Destination room (new home)</label><input type="text" id="box-dest" placeholder="Where should this go at new address?"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-box')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBox()">Save Box</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory Item -->
+<div id="modal-item" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="item-modal-title">Add Item</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-item')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="item-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Item name</label><input type="text" id="item-name" placeholder="e.g. Sofa"></div>
+        <div class="form-group"><label>Room</label><input type="text" id="item-room" placeholder="e.g. Living room"></div>
+      </div>
+      <div class="form-row form-row-3">
+        <div class="form-group"><label>Quantity</label><input type="number" id="item-qty" value="1" min="1"></div>
+        <div class="form-group"><label>Condition</label><select id="item-cond"><option>Good</option><option>Fair</option><option>Poor</option></select></div>
+        <div class="form-group"><label>Action</label><select id="item-action"><option value="move">Move</option><option value="donate">Donate</option><option value="sell">Sell</option><option value="dispose">Dispose</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="item-notes" placeholder="Any handling notes..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-item')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInventoryItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Address Change Org -->
+<div id="modal-addr" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="addr-modal-title">Add Organisation</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-addr')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="addr-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Organisation</label><input type="text" id="addr-org" placeholder="e.g. HMRC"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="addr-cat">
+            <option>Bank / Finance</option><option>Government</option><option>Employer</option>
+            <option>NHS / Medical</option><option>Insurance</option><option>Subscription</option>
+            <option>Utilities</option><option>Online Shopping</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>How to update</label><input type="text" id="addr-how" placeholder="e.g. Online portal / phone"></div>
+        <div class="form-group"><label>Status</label><select id="addr-status"><option value="pending">Pending</option><option value="done">Done</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="addr-notes" placeholder="Account number, contact details etc."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-addr')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddrOrg()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Utility -->
+<div id="modal-utility" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="util-modal-title">Add Utility / Service</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-utility')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="util-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Service</label><input type="text" id="util-name" placeholder="e.g. British Gas"></div>
+        <div class="form-group"><label>Type</label>
+          <select id="util-type">
+            <option>Gas</option><option>Electricity</option><option>Water</option><option>Broadband</option>
+            <option>TV Licence</option><option>Council Tax</option><option>Phone</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Account / Reference</label><input type="text" id="util-ref" placeholder="Account number"></div>
+        <div class="form-group"><label>Action needed</label>
+          <select id="util-action">
+            <option value="transfer">Transfer to new address</option>
+            <option value="cancel">Cancel old, set up new</option>
+            <option value="meter">Take meter reading</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="util-notes" placeholder="e.g. Call 30 days before move date"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-utility')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUtility()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact -->
+<div id="modal-contact" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="contact-modal-title">Add Contact</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-contact')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="contact-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Name / Company</label><input type="text" id="c-name" placeholder="e.g. John Smith Solicitors"></div>
+        <div class="form-group"><label>Role</label><input type="text" id="c-role" placeholder="e.g. Solicitor"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Phone</label><input type="tel" id="c-phone" placeholder="0800 000 0000"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="c-email" placeholder="name@example.com"></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="c-notes" placeholder="Any useful context..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-contact')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveContact()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note -->
+<div id="modal-note" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="note-modal-title">Add Note</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-note')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="note-edit-id">
+      <div class="form-row form-row-2">
+        <div class="form-group"><label>Title</label><input type="text" id="note-title" placeholder="Note title"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="note-cat">
+            <option>General</option><option>Property</option><option>Legal</option><option>Packing</option><option>Reminder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Content</label><textarea id="note-body" style="min-height:120px;" placeholder="Your note..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-note')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Find Item in Box -->
+<div id="modal-item-search" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Find item in a box</h2>
+        <p style="font-size:12px;color:var(--ink3);margin-top:3px;">Search box contents, tags, and room names</p>
+      </div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('modal-item-search')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="position:relative;">
+        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink3);"></i>
+        <input type="text" id="item-search-input" placeholder="e.g. kettle, books, cables…" style="padding-left:36px;" oninput="runItemSearch()" autofocus>
+      </div>
+      <div id="item-search-results" style="margin-top:16px;min-height:60px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-item-search')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Box View -->
+<div id="modal-box-view" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="bv-title">Box Details</h2><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-box-view')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body" id="bv-body"></div>
+    <div class="modal-footer" id="bv-footer"></div>
+  </div>
+</div>
+
+<script>
+// ===== DB =====
+const DB_KEY = 'moveplan_v2';
+let db = {
+  moveDate: '', fromAddr: '', toAddr: '',
+  tasks: [], expenses: [], budgetTotal: 5000,
+  quotes: [], boxes: [], inventory: [],
+  addresses: { old: '', new: '', orgs: [] },
+  utilities: [], contacts: [], notes: [],
+  selectedQuote: null
+};
+
+function loadDB() {
+  try { const s = localStorage.getItem(DB_KEY); if (s) db = { ...db, ...JSON.parse(s) }; } catch(e) {}
+}
+function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ===== NAV =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const mapping = {
+    dashboard:'Dashboard',checklist:'Master Checklist',timeline:'Move Timeline',
+    budget:'Budget Tracker',quotes:'Removal Quotes',boxes:'Box Tracker',
+    inventory:'Inventory',addresses:'Address Changes',utilities:'Utilities & Services',
+    contacts:'Key Contacts',notes:'Notes'
+  };
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  renderPage(id);
+}
+function renderPage(id) {
+  const fns = {
+    dashboard: renderDashboard, checklist: renderChecklist,
+    timeline: renderTimeline, budget: renderBudget,
+    quotes: renderQuotes, boxes: renderBoxes,
+    inventory: renderInventory, addresses: renderAddresses,
+    utilities: renderUtilities, contacts: renderContacts, notes: renderNotes
+  };
+  if (fns[id]) fns[id]();
+}
+
+// ===== MODAL =====
+function openModal(id, data) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+
+// ===== MOVE DATE =====
+function saveMoveDate() {
+  db.moveDate = document.getElementById('move-date-input').value;
+  db.fromAddr = document.getElementById('from-addr-modal').value;
+  db.toAddr = document.getElementById('to-addr-modal').value;
+  saveDB(); closeModal('modal-movedate'); renderDashboard();
+  if(db.moveDate) document.getElementById('move-date-display').textContent = 'Moving: ' + new Date(db.moveDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+function loadMoveDateUI() {
+  if(db.moveDate) {
+    document.getElementById('move-date-input').value = db.moveDate;
+    document.getElementById('move-date-display').textContent = 'Moving: ' + new Date(db.moveDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+  if(db.fromAddr) document.getElementById('from-addr-modal').value = db.fromAddr;
+  if(db.toAddr) document.getElementById('to-addr-modal').value = db.toAddr;
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  // Stats
+  const total = db.tasks.length;
+  const done = db.tasks.filter(t=>t.done).length;
+  const boxesPacked = db.boxes.filter(b=>b.status==='packed').length;
+  const addrDone = (db.addresses.orgs||[]).filter(a=>a.status==='done').length;
+  const spent = db.expenses.reduce((s,e)=>s+(e.status==='paid'?parseFloat(e.amount)||0:0),0);
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon" style="background:var(--violet-bg);color:var(--violet);"><i class="fa-solid fa-list-check"></i></div><div class="stat-label">Tasks done</div><div class="stat-value">${done}<span style="font-size:16px;color:var(--ink3);">/${total}</span></div><div class="stat-sub">${total?Math.round(done/total*100):0}% complete</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--emerald-bg);color:var(--emerald);"><i class="fa-solid fa-box"></i></div><div class="stat-label">Boxes packed</div><div class="stat-value">${boxesPacked}<span style="font-size:16px;color:var(--ink3);">/${db.boxes.length}</span></div><div class="stat-sub">of ${db.boxes.length} total boxes</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--sky-bg);color:var(--sky);"><i class="fa-solid fa-envelope-circle-check"></i></div><div class="stat-label">Addresses updated</div><div class="stat-value">${addrDone}<span style="font-size:16px;color:var(--ink3);">/${(db.addresses.orgs||[]).length}</span></div><div class="stat-sub">organisations notified</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="fa-solid fa-sterling-sign"></i></div><div class="stat-label">Amount spent</div><div class="stat-value" style="color:var(--violet)">£${spent.toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="stat-sub">of £${(db.budgetTotal||0).toLocaleString()} budget</div></div>
+  `;
+  // Overall progress
+  let scores = [], weights = [];
+  if(total) { scores.push(done/total); weights.push(3); }
+  if(db.boxes.length) { scores.push(boxesPacked/db.boxes.length); weights.push(2); }
+  if((db.addresses.orgs||[]).length) { scores.push(addrDone/(db.addresses.orgs||[]).length); weights.push(1); }
+  const pct = scores.length ? Math.round(scores.reduce((s,v,i)=>s+v*weights[i],0)/weights.reduce((a,b)=>a+b,0)*100) : 0;
+  document.getElementById('overall-pct').textContent = pct+'%';
+  document.getElementById('overall-fill').style.width = pct+'%';
+  // Upcoming tasks
+  const upcoming = db.tasks.filter(t=>!t.done).slice(0,5);
+  document.getElementById('dash-tasks').innerHTML = upcoming.length ? upcoming.map(t=>`
+    <div class="checklist-item">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+      <div class="item-text"><div>${t.name}</div><div class="item-meta">${phaseLabel(t.phase)}</div></div>
+      <span class="dot dot-${t.priority||'med'}"></span>
+    </div>`).join('') : '<div class="empty-state"><i class="fa-solid fa-check-circle"></i><p>All tasks done! 🎉</p></div>';
+  // Budget
+  const cats = {};
+  db.expenses.forEach(e => {
+    if (!cats[e.cat]) cats[e.cat] = 0;
+    cats[e.cat] += parseFloat(e.amount)||0;
+  });
+  const budSpent = Object.values(cats).reduce((a,b)=>a+b,0);
+  const budMax = db.budgetTotal||5000;
+  document.getElementById('dash-budget').innerHTML = Object.keys(cats).slice(0,5).map(c=>`
+    <div class="budget-cat">
+      <div style="font-size:13px;">${c}</div>
+      <div style="text-align:right;">
+        <div style="font-weight:500;">£${cats[c].toLocaleString()}</div>
+        <div class="budget-bar-wrap" style="width:100px;"><div class="budget-bar" style="width:${Math.min(100,cats[c]/budMax*100)}%;background:var(--violet);"></div></div>
+      </div>
+    </div>`).join('') + `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--surface2);display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Total spent</span><strong>£${budSpent.toLocaleString()}</strong></div>`;
+  // Countdown
+  const cd = document.getElementById('dash-countdown');
+  if(db.moveDate) {
+    const diff = Math.ceil((new Date(db.moveDate)-new Date())/(1000*86400));
+    cd.innerHTML = diff > 0 ? `<div class="countdown-number">${diff}</div><div style="font-size:15px;color:var(--ink3);margin-top:10px;font-weight:500;">days until moving day</div>` : `<div style="font-family:'Instrument Serif',serif;font-size:32px;color:var(--emerald);">You've moved! 🎉</div>`;
+  } else {
+    cd.innerHTML = `<div style="color:var(--ink3);font-size:14px;margin-bottom:12px;">Set your move date to see the countdown</div><button class="btn btn-secondary btn-sm" onclick="openModal('modal-movedate')"><i class="fa-solid fa-calendar"></i> Set Date</button>`;
+  }
+  // Packing
+  const rooms = {};
+  db.boxes.forEach(b=>{ if(!rooms[b.room]) rooms[b.room]={total:0,packed:0}; rooms[b.room].total++; if(b.status==='packed') rooms[b.room].packed++; });
+  const packHtml = Object.entries(rooms).map(([room,{total,packed}])=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>${room}</span><span class="text-muted">${packed}/${total}</span></div>
+      <div class="budget-bar-wrap"><div class="budget-bar" style="width:${total?packed/total*100:0}%;background:var(--teal);"></div></div>
+    </div>`).join('');
+  document.getElementById('dash-packing').innerHTML = packHtml || '<p class="text-muted text-sm">No boxes tracked yet. <a href="#" onclick="showPage(\'boxes\')">Add boxes</a></p>';
+}
+
+// ===== CHECKLIST =====
+let currentPhaseFilter = 'all';
+const DEFAULT_TASKS = [
+  {name:'Get multiple removal quotes',phase:'8weeks',priority:'high',notes:'Get at least 3 quotes'},
+  {name:'Notify landlord / estate agent',phase:'8weeks',priority:'high',notes:'Check notice period in contract'},
+  {name:'Hire solicitor / conveyancer',phase:'8weeks',priority:'high',notes:''},
+  {name:'Start decluttering',phase:'8weeks',priority:'med',notes:'Room by room'},
+  {name:'Research and book storage if needed',phase:'8weeks',priority:'low',notes:''},
+  {name:'Notify employer of new address',phase:'4weeks',priority:'high',notes:''},
+  {name:'Register with GP at new address',phase:'4weeks',priority:'high',notes:'NHS registration'},
+  {name:'Notify HMRC of address change',phase:'4weeks',priority:'high',notes:'Online via Government Gateway'},
+  {name:'Order packing supplies',phase:'4weeks',priority:'med',notes:'Boxes, tape, bubble wrap, markers'},
+  {name:'Arrange mail redirection (Royal Mail)',phase:'4weeks',priority:'high',notes:'6-12 months recommended'},
+  {name:'Update bank / building society',phase:'4weeks',priority:'high',notes:'Online banking portal'},
+  {name:'Update driving licence address (DVLA)',phase:'4weeks',priority:'med',notes:'Free via GOV.UK'},
+  {name:'Update V5C vehicle logbook (DVLA)',phase:'4weeks',priority:'med',notes:''},
+  {name:'Update electoral roll',phase:'4weeks',priority:'med',notes:'Via GOV.UK'},
+  {name:'Update passport records',phase:'4weeks',priority:'low',notes:'Not required for UK passport but good practice'},
+  {name:'Start packing non-essentials',phase:'2weeks',priority:'high',notes:'Books, ornaments, out-of-season clothing'},
+  {name:'Defrost freezer',phase:'2weeks',priority:'med',notes:'24-48 hrs before move day'},
+  {name:'Return library books, borrowed items',phase:'2weeks',priority:'low',notes:''},
+  {name:'Confirm removal company details',phase:'2weeks',priority:'high',notes:'Reconfirm time, parking, access'},
+  {name:'Pack a "first night" essentials box',phase:'2weeks',priority:'high',notes:'Kettle, mugs, bedding, toiletries, chargers'},
+  {name:'Label all boxes clearly',phase:'2weeks',priority:'high',notes:'Room + brief contents'},
+  {name:'Take meter readings at old property',phase:'moveday',priority:'high',notes:'Gas, electricity, water'},
+  {name:'Take meter readings at new property',phase:'moveday',priority:'high',notes:'Gas, electricity, water'},
+  {name:'Photograph condition of old property',phase:'moveday',priority:'high',notes:'Protect deposit'},
+  {name:'Photograph condition of new property',phase:'moveday',priority:'high',notes:'On arrival before unpacking'},
+  {name:'Return / collect all keys',phase:'moveday',priority:'high',notes:'Include garage, gate, mailbox keys'},
+  {name:'Check all rooms and cupboards before leaving',phase:'moveday',priority:'high',notes:'Loft, shed, garage'},
+  {name:'Change locks at new property',phase:'after',priority:'high',notes:'Previous owners may have spare keys'},
+  {name:'Register with new GP and dentist',phase:'after',priority:'high',notes:''},
+  {name:'Update council tax (both councils)',phase:'after',priority:'high',notes:'Tell old council you\'ve moved'},
+  {name:'Test smoke and CO2 alarms',phase:'after',priority:'high',notes:''},
+  {name:'Locate stopcock and fuse box',phase:'after',priority:'high',notes:'Essential for emergencies'},
+  {name:'Unpack and deep clean',phase:'after',priority:'med',notes:''},
+  {name:'Introduce yourself to new neighbours',phase:'after',priority:'low',notes:''},
+];
+const DEFAULT_ADDR_ORGS = [
+  {org:'HMRC',cat:'Government',how:'Online – Government Gateway',status:'pending',notes:''},
+  {org:'DVLA (Driving Licence)',cat:'Government',how:'GOV.UK online service',status:'pending',notes:'Free'},
+  {org:'DVLA (Vehicle Logbook V5C)',cat:'Government',how:'GOV.UK online service',status:'pending',notes:'Free'},
+  {org:'Electoral Roll',cat:'Government',how:'gov.uk/register-to-vote',status:'pending',notes:''},
+  {org:'Passport Office',cat:'Government',how:'Not mandatory but advisable',status:'pending',notes:''},
+  {org:'NHS / GP Surgery',cat:'NHS / Medical',how:'Register with new GP',status:'pending',notes:''},
+  {org:'Royal Mail Redirection',cat:'Other',how:'royalmail.com',status:'pending',notes:'From £33.99 for 3 months'},
+  {org:'Bank / Building Society',cat:'Bank / Finance',how:'Online banking or branch',status:'pending',notes:''},
+  {org:'Credit cards',cat:'Bank / Finance',how:'Online or app',status:'pending',notes:''},
+  {org:'HMRC – Child Benefit',cat:'Government',how:'Online – Government Gateway',status:'pending',notes:''},
+  {org:'Student Loans Company',cat:'Government',how:'Online account',status:'pending',notes:''},
+  {org:'Car Insurance',cat:'Insurance',how:'Call or online',status:'pending',notes:'May affect premium'},
+  {org:'Home Insurance',cat:'Insurance',how:'New policy for new home',status:'pending',notes:''},
+  {org:'Life Insurance',cat:'Insurance',how:'Contact provider',status:'pending',notes:''},
+  {org:'Employer / HR',cat:'Employer',how:'Inform HR department',status:'pending',notes:''},
+  {org:'Pension provider',cat:'Bank / Finance',how:'Contact provider',status:'pending',notes:''},
+  {org:'Internet / Broadband provider',cat:'Utilities',how:'Transfer or new contract',status:'pending',notes:''},
+  {org:'Council Tax (old)',cat:'Government',how:'Notify old council',status:'pending',notes:''},
+  {org:'Council Tax (new)',cat:'Government',how:'Register with new council',status:'pending',notes:''},
+  {org:'TV Licence',cat:'Utilities',how:'tvlicensing.co.uk',status:'pending',notes:''},
+  {org:'Amazon',cat:'Online Shopping',how:'Account settings',status:'pending',notes:''},
+  {org:'DVSA (MOT / vehicle tax)',cat:'Government',how:'GOV.UK',status:'pending',notes:''},
+];
+const DEFAULT_UTILITIES = [
+  {name:'Gas supplier',type:'Gas',ref:'',action:'meter',notes:'Take readings on move day'},
+  {name:'Electricity supplier',type:'Electricity',ref:'',action:'meter',notes:'Take readings on move day'},
+  {name:'Water supplier',type:'Water',ref:'',action:'transfer',notes:''},
+  {name:'Broadband / Internet',type:'Broadband',ref:'',action:'cancel',notes:'Book installation at new home early'},
+  {name:'TV Licence',type:'TV Licence',ref:'',action:'transfer',notes:'Transfer online at tvlicensing.co.uk'},
+  {name:'Council Tax',type:'Council Tax',ref:'',action:'cancel',notes:'Inform both old and new councils'},
+];
+
+function seedDefaults() {
+  if (db.tasks.length === 0) {
+    db.tasks = DEFAULT_TASKS.map(t => ({ ...t, id: uid(), done: false }));
+  }
+  if ((db.addresses.orgs||[]).length === 0) {
+    db.addresses.orgs = DEFAULT_ADDR_ORGS.map(a => ({ ...a, id: uid() }));
+  }
+  if (db.utilities.length === 0) {
+    db.utilities = DEFAULT_UTILITIES.map(u => ({ ...u, id: uid() }));
+  }
+  saveDB();
+}
+
+function phaseLabel(p) {
+  return {
+    '8weeks':'8+ weeks before','4weeks':'4–8 weeks before',
+    '2weeks':'1–4 weeks before','moveday':'Move day','after':'After move'
+  }[p] || p;
+}
+
+function filterChecklist(phase, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentPhaseFilter = phase;
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const tasks = currentPhaseFilter === 'all' ? db.tasks : db.tasks.filter(t=>t.phase===currentPhaseFilter);
+  const phases = ['8weeks','4weeks','2weeks','moveday','after'];
+  let html = '';
+  if (currentPhaseFilter === 'all') {
+    phases.forEach(phase => {
+      const pTasks = tasks.filter(t=>t.phase===phase);
+      if (!pTasks.length) return;
+      const doneCount = pTasks.filter(t=>t.done).length;
+      html += `<div style="margin-bottom:24px;"><div class="phase-header"><h3>${phaseLabel(phase)}</h3><span class="badge badge-violet">${doneCount}/${pTasks.length}</span></div>`;
+      html += pTasks.map(t => taskRow(t)).join('');
+      html += `</div>`;
+    });
+  } else {
+    html = tasks.map(t => taskRow(t)).join('');
+  }
+  document.getElementById('checklist-list').innerHTML = html || '<div class="empty-state"><i class="fa-solid fa-check-circle"></i><p>No tasks in this phase yet.</p></div>';
+}
+
+function taskRow(t) {
+  return `<div class="checklist-item ${t.done?'done':''}" id="task-row-${t.id}">
+    <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+    <div class="item-text">
+      <div>${t.name}</div>
+      ${t.notes?`<div class="item-meta">${t.notes}</div>`:''}
+    </div>
+    <span class="dot dot-${t.priority||'med'}" title="${t.priority} priority"></span>
+    <button class="btn btn-ghost btn-icon btn-sm" onclick="editTask('${t.id}')"><i class="fa-solid fa-pen"></i></button>
+    <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteTask('${t.id}')"><i class="fa-solid fa-trash"></i></button>
+  </div>`;
+}
+
+function toggleTask(id) {
+  const t = db.tasks.find(t=>t.id===id); if(!t) return;
+  t.done = !t.done; saveDB();
+  renderChecklist(); renderDashboard();
+}
+
+function saveTask() {
+  const id = document.getElementById('task-edit-id').value;
+  const name = document.getElementById('task-name').value.trim();
+  if (!name) return;
+  if (id) {
+    const t = db.tasks.find(t=>t.id===id);
+    t.name = name; t.phase = document.getElementById('task-phase').value;
+    t.priority = document.getElementById('task-priority').value;
+    t.notes = document.getElementById('task-notes').value;
+  } else {
+    db.tasks.push({ id:uid(), name, phase:document.getElementById('task-phase').value, priority:document.getElementById('task-priority').value, notes:document.getElementById('task-notes').value, done:false });
+  }
+  saveDB(); closeModal('modal-task'); renderChecklist(); renderDashboard();
+}
+
+function editTask(id) {
+  const t = db.tasks.find(t=>t.id===id); if(!t) return;
+  document.getElementById('task-modal-title').textContent = 'Edit Task';
+  document.getElementById('task-edit-id').value = id;
+  document.getElementById('task-name').value = t.name;
+  document.getElementById('task-phase').value = t.phase;
+  document.getElementById('task-priority').value = t.priority||'med';
+  document.getElementById('task-notes').value = t.notes||'';
+  openModal('modal-task');
+}
+
+function deleteTask(id) {
+  if (!confirm('Delete this task?')) return;
+  db.tasks = db.tasks.filter(t=>t.id!==id);
+  saveDB(); renderChecklist(); renderDashboard();
+}
+
+// ===== TIMELINE =====
+function renderTimeline() {
+  const phases = ['8weeks','4weeks','2weeks','moveday','after'];
+  const html = `<h2 style="font-size:18px;margin-bottom:20px;">Move timeline</h2>
+    <div class="timeline">` + phases.map(p => {
+    const total = db.tasks.filter(t=>t.phase===p).length;
+    const done = db.tasks.filter(t=>t.phase===p&&t.done).length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const cls = pct===100?'done':pct>0?'active':'pending';
+    return `<div class="timeline-item">
+      <div class="timeline-dot ${cls}"></div>
+      <div class="timeline-content">
+        <h4>${phaseLabel(p)}</h4>
+        <p>${done}/${total} tasks done (${pct}%)</p>
+        <div class="budget-bar-wrap" style="width:180px;margin-top:4px;"><div class="budget-bar" style="width:${pct}%;background:${pct===100?'var(--emerald)':'var(--violet)'};"></div></div>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+  document.getElementById('timeline-content').innerHTML = html;
+  const moveDayTasks = db.tasks.filter(t=>t.phase==='moveday');
+  document.getElementById('moveday-list').innerHTML = `<h2 style="font-size:18px;margin-bottom:16px;">Move day tasks</h2>` +
+    (moveDayTasks.length ? moveDayTasks.map(t=>taskRow(t)).join('') : '<div class="empty-state"><i class="fa-solid fa-box"></i><p>No move day tasks yet.</p></div>');
+}
+
+// ===== BUDGET =====
+function renderBudget() {
+  const total = db.budgetTotal || 0;
+  const spent = db.expenses.filter(e=>e.status==='paid').reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const planned = db.expenses.filter(e=>e.status==='planned').reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  document.getElementById('bud-total').textContent = '£'+total.toLocaleString();
+  document.getElementById('bud-spent').textContent = '£'+spent.toLocaleString();
+  document.getElementById('bud-remain').textContent = '£'+(total-spent).toLocaleString();
+  document.getElementById('budget-total-input').value = total || '';
+  // Expenses list
+  document.getElementById('expense-list').innerHTML = db.expenses.length ?
+    `<div class="table-wrap"><table><thead><tr><th>Description</th><th>Category</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>` +
+    db.expenses.map(e=>`<tr>
+      <td>${e.desc}</td><td><span class="badge badge-gray">${e.cat}</span></td>
+      <td><strong>£${parseFloat(e.amount||0).toLocaleString()}</strong></td>
+      <td><span class="badge ${e.status==='paid'?'badge-green':'badge-amber'}">${e.status==='paid'?'Paid':'Planned'}</span></td>
+      <td><button class="btn btn-ghost btn-icon btn-sm" onclick="editExpense('${e.id}')"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteExpense('${e.id}')"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('') + `</tbody></table></div>` :
+    '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>No expenses yet.</p></div>';
+  // Category breakdown
+  const cats = {};
+  db.expenses.forEach(e=>{if(!cats[e.cat])cats[e.cat]=0; cats[e.cat]+=parseFloat(e.amount||0);});
+  const maxCat = Math.max(...Object.values(cats), 1);
+  const colors = ['#6366f1','#10b981','#0ea5e9','#f59e0b','#f43f5e','#14b8a6'];
+  document.getElementById('budget-breakdown').innerHTML = Object.entries(cats).map(([c,v],i)=>`
+    <div class="budget-cat">
+      <div><div style="font-size:13px;">${c}</div></div>
+      <div style="text-align:right;min-width:80px;">
+        <div style="font-weight:500;font-size:13px;">£${v.toLocaleString()}</div>
+        <div class="budget-bar-wrap" style="width:100px;"><div class="budget-bar" style="width:${v/maxCat*100}%;background:${colors[i%colors.length]};"></div></div>
+      </div>
+    </div>`).join('') || '<p class="text-muted text-sm">No expenses to show.</p>';
+}
+function saveBudgetTotal() {
+  db.budgetTotal = parseFloat(document.getElementById('budget-total-input').value)||0;
+  saveDB(); renderBudget(); renderDashboard();
+}
+function saveExpense() {
+  const id = document.getElementById('exp-edit-id').value;
+  const data = {
+    desc: document.getElementById('exp-desc').value.trim(),
+    amount: document.getElementById('exp-amount').value,
+    cat: document.getElementById('exp-cat').value,
+    date: document.getElementById('exp-date').value,
+    status: document.getElementById('exp-status').value
+  };
+  if (!data.desc) return;
+  if (id) { Object.assign(db.expenses.find(e=>e.id===id), data); }
+  else { db.expenses.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-expense'); renderBudget(); renderDashboard();
+}
+function editExpense(id) {
+  const e = db.expenses.find(e=>e.id===id); if(!e) return;
+  document.getElementById('exp-modal-title').textContent = 'Edit Expense';
+  document.getElementById('exp-edit-id').value = id;
+  document.getElementById('exp-desc').value = e.desc;
+  document.getElementById('exp-amount').value = e.amount;
+  document.getElementById('exp-cat').value = e.cat;
+  document.getElementById('exp-date').value = e.date||'';
+  document.getElementById('exp-status').value = e.status;
+  openModal('modal-expense');
+}
+function deleteExpense(id) {
+  if(!confirm('Delete expense?')) return;
+  db.expenses = db.expenses.filter(e=>e.id!==id);
+  saveDB(); renderBudget(); renderDashboard();
+}
+
+// ===== QUOTES =====
+function renderQuotes() {
+  if (!db.quotes.length) {
+    document.getElementById('quotes-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-truck-moving"></i><p>No quotes yet. Add your first removal quote.</p></div>';
+    return;
+  }
+  document.getElementById('quotes-grid').innerHTML = db.quotes.map(q=>`
+    <div class="quote-card ${q.id===db.selectedQuote?'selected':''}">
+      <div class="quote-company">${q.company}</div>
+      <div class="quote-price">£${parseFloat(q.price||0).toLocaleString()}</div>
+      <ul class="quote-details">
+        <li>${q.packing==='yes'?'Packing included':'Packing not included'}</li>
+        <li>${q.insurance==='yes'?'Insurance included':'Insurance extra'}</li>
+        ${q.crew?`<li>${q.crew}</li>`:''}
+        ${q.vans?`<li>${q.vans}</li>`:''}
+      </ul>
+      ${q.notes?`<p style="font-size:12px;color:var(--ink3);margin-top:12px;">${q.notes}</p>`:''}
+      <div class="flex gap-2 mt-2" style="margin-top:16px;">
+        ${q.id===db.selectedQuote?`<span class="badge badge-green"><i class="fa-solid fa-check"></i> Selected</span>`:`<button class="btn btn-secondary btn-sm" onclick="selectQuote('${q.id}')">Select this</button>`}
+        <button class="btn btn-ghost btn-icon btn-sm" onclick="editQuote('${q.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteQuote('${q.id}')"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function selectQuote(id) { db.selectedQuote = id; saveDB(); renderQuotes(); }
+function saveQuote() {
+  const id = document.getElementById('quote-edit-id').value;
+  const data = {
+    company: document.getElementById('q-company').value.trim(),
+    price: document.getElementById('q-price').value,
+    packing: document.getElementById('q-packing').value,
+    insurance: document.getElementById('q-insurance').value,
+    crew: document.getElementById('q-crew').value,
+    vans: document.getElementById('q-vans').value,
+    notes: document.getElementById('q-notes').value
+  };
+  if(!data.company) return;
+  if(id) { Object.assign(db.quotes.find(q=>q.id===id), data); }
+  else { db.quotes.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-quote'); renderQuotes();
+}
+function editQuote(id) {
+  const q = db.quotes.find(q=>q.id===id); if(!q) return;
+  document.getElementById('quote-modal-title').textContent='Edit Quote';
+  document.getElementById('quote-edit-id').value=id;
+  document.getElementById('q-company').value=q.company;
+  document.getElementById('q-price').value=q.price;
+  document.getElementById('q-packing').value=q.packing;
+  document.getElementById('q-insurance').value=q.insurance;
+  document.getElementById('q-crew').value=q.crew||'';
+  document.getElementById('q-vans').value=q.vans||'';
+  document.getElementById('q-notes').value=q.notes||'';
+  openModal('modal-quote');
+}
+function deleteQuote(id) {
+  if(!confirm('Delete quote?')) return;
+  db.quotes=db.quotes.filter(q=>q.id!==id); if(db.selectedQuote===id) db.selectedQuote=null;
+  saveDB(); renderQuotes();
+}
+
+// ===== BOXES =====
+// --- Tag input widget ---
+let _currentTags = [];
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,+$/, '');
+    if (val) addTag(val);
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && e.target.value === '' && _currentTags.length) {
+    removeTag(_currentTags[_currentTags.length - 1]);
+  }
+}
+function handleTagInput(e) {
+  if (e.target.value.endsWith(',')) {
+    const val = e.target.value.replace(/,/g,'').trim();
+    if (val) addTag(val);
+    e.target.value = '';
+  }
+}
+function addTag(label) {
+  const clean = label.trim();
+  if (!clean || _currentTags.includes(clean)) return;
+  _currentTags.push(clean);
+  renderTagPills();
+}
+function removeTag(label) {
+  _currentTags = _currentTags.filter(t => t !== label);
+  renderTagPills();
+}
+function renderTagPills() {
+  const wrap = document.getElementById('box-tag-wrap');
+  const input = document.getElementById('box-tag-input');
+  wrap.querySelectorAll('.tag-pill').forEach(p => p.remove());
+  _currentTags.forEach(tag => {
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `${tag}<button type="button" onclick="removeTag('${tag.replace(/'/g,"\\'")}')">×</button>`;
+    wrap.insertBefore(pill, input);
+  });
+  document.getElementById('box-tags-hidden').value = _currentTags.join(',');
+}
+function setTagsUI(tags) {
+  _currentTags = tags ? [...tags] : [];
+  renderTagPills();
+}
+
+function renderBoxes() {
+  const roomFilter = document.getElementById('box-filter')?.value || '';
+  const tagFilter = (document.getElementById('box-tag-filter')?.value || '').toLowerCase().trim();
+  const rooms = [...new Set(db.boxes.map(b=>b.room))];
+  const sel = document.getElementById('box-filter');
+  if(sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All rooms</option>' + rooms.map(r=>`<option ${r===cur?'selected':''} value="${r}">${r}</option>`).join('');
+  }
+  let boxes = roomFilter ? db.boxes.filter(b=>b.room===roomFilter) : db.boxes;
+  if (tagFilter) boxes = boxes.filter(b => (b.tags||[]).some(t=>t.toLowerCase().includes(tagFilter)) || (b.room||'').toLowerCase().includes(tagFilter) || (b.contents||'').toLowerCase().includes(tagFilter));
+  const total = db.boxes.length;
+  const packed = db.boxes.filter(b=>b.status==='packed').length;
+  const partial = db.boxes.filter(b=>b.status==='partial').length;
+  const empty = db.boxes.filter(b=>b.status==='empty').length;
+  document.getElementById('box-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon" style="background:var(--violet-bg);color:var(--violet);"><i class="fa-solid fa-boxes-stacked"></i></div><div class="stat-label">Total boxes</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--emerald-bg);color:var(--emerald);"><i class="fa-solid fa-check-circle"></i></div><div class="stat-label">Packed</div><div class="stat-value" style="color:var(--emerald)">${packed}</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="fa-solid fa-spinner"></i></div><div class="stat-label">In progress</div><div class="stat-value" style="color:var(--amber)">${partial}</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--surface2);color:var(--ink3);"><i class="fa-solid fa-box-open"></i></div><div class="stat-label">Empty</div><div class="stat-value" style="color:var(--ink3)">${empty}</div></div>
+  `;
+  document.getElementById('box-count-display').textContent = `${packed}/${total} packed`;
+  document.getElementById('box-grid').innerHTML = boxes.length ?
+    boxes.map((b)=>{
+      const idx = db.boxes.indexOf(b)+1;
+      const tagsHtml = (b.tags||[]).length ? `<div class="box-tags">${b.tags.map(t=>`<span class="box-tag">${t}</span>`).join('')}</div>` : '';
+      return `<div class="box-card ${b.status==='packed'?'packed':''}" onclick="viewBox('${b.id}')">
+        ${b.fragile==='yes'?`<span style="position:absolute;top:8px;right:8px;font-size:10px;background:var(--amber-bg);color:var(--amber);border-radius:99px;padding:2px 8px;">⚠ Fragile</span>`:''}
+        <div class="box-number">#${idx}</div>
+        <div class="box-room">${b.room}</div>
+        <div class="box-items">${b.contents||'No contents listed'}</div>
+        ${tagsHtml}
+        <div style="margin-top:8px;"><span class="badge ${b.status==='packed'?'badge-green':b.status==='partial'?'badge-amber':'badge-gray'}">${b.status==='packed'?'Packed':b.status==='partial'?'In progress':'Empty'}</span></div>
+      </div>`;
+    }).join('') :
+    '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-box-open"></i><p>No boxes match your filter.</p></div>';
+}
+function viewBox(id) {
+  const b = db.boxes.find(b=>b.id===id); if(!b) return;
+  const idx = db.boxes.indexOf(b)+1;
+  document.getElementById('bv-title').textContent = `Box #${idx} — ${b.room}`;
+  const tagsHtml = (b.tags||[]).length ? `<div class="box-tags" style="margin-top:4px;">${b.tags.map(t=>`<span class="box-tag" style="font-size:11px;">${t}</span>`).join('')}</div>` : '—';
+  document.getElementById('bv-body').innerHTML = `
+    <table style="width:100%;font-size:13.5px;">
+      <tr><td style="color:var(--ink3);padding:8px 0;width:140px;">Room</td><td><strong>${b.room}</strong></td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;">Contents</td><td>${b.contents||'—'}</td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;vertical-align:top;">Tags</td><td>${tagsHtml}</td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;">Size</td><td>${b.size}</td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;">Status</td><td><span class="badge ${b.status==='packed'?'badge-green':b.status==='partial'?'badge-amber':'badge-gray'}">${b.status}</span></td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;">Fragile</td><td>${b.fragile==='yes'?'<span class="badge badge-amber">⚠ Yes — Handle with care</span>':'No'}</td></tr>
+      <tr><td style="color:var(--ink3);padding:8px 0;">Destination</td><td>${b.dest||'—'}</td></tr>
+    </table>`;
+  document.getElementById('bv-footer').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal('modal-box-view')">Close</button>
+    <button class="btn btn-ghost" onclick="editBox('${id}');closeModal('modal-box-view')">Edit</button>
+    <button class="btn btn-primary" onclick="markBoxPacked('${id}');closeModal('modal-box-view')">${b.status==='packed'?'Mark unpacked':'Mark packed'}</button>`;
+  openModal('modal-box-view');
+}
+function markBoxPacked(id) {
+  const b = db.boxes.find(b=>b.id===id); if(!b) return;
+  b.status = b.status==='packed'?'partial':'packed';
+  saveDB(); renderBoxes();
+}
+function saveBox() {
+  const id = document.getElementById('box-edit-id').value;
+  const tagsRaw = document.getElementById('box-tags-hidden').value;
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  const data = {
+    room: document.getElementById('box-room').value.trim(),
+    size: document.getElementById('box-size').value,
+    contents: document.getElementById('box-contents').value,
+    tags,
+    fragile: document.getElementById('box-fragile').value,
+    status: document.getElementById('box-status').value,
+    dest: document.getElementById('box-dest').value
+  };
+  if(!data.room) return;
+  if(id) { Object.assign(db.boxes.find(b=>b.id===id), data); }
+  else { db.boxes.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-box'); renderBoxes();
+}
+function editBox(id) {
+  const b = db.boxes.find(b=>b.id===id); if(!b) return;
+  document.getElementById('box-modal-title').textContent='Edit Box';
+  document.getElementById('box-edit-id').value=id;
+  document.getElementById('box-room').value=b.room;
+  document.getElementById('box-size').value=b.size;
+  document.getElementById('box-contents').value=b.contents||'';
+  document.getElementById('box-fragile').value=b.fragile||'no';
+  document.getElementById('box-status').value=b.status;
+  document.getElementById('box-dest').value=b.dest||'';
+  setTagsUI(b.tags||[]);
+  openModal('modal-box');
+}
+
+// --- Find Item in Box ---
+function runItemSearch() {
+  const q = document.getElementById('item-search-input').value.trim().toLowerCase();
+  const results = document.getElementById('item-search-results');
+  if (!q) { results.innerHTML = '<p class="text-muted text-sm" style="text-align:center;">Start typing to search across all box contents and tags.</p>'; return; }
+  const matches = [];
+  db.boxes.forEach(b => {
+    const idx = db.boxes.indexOf(b)+1;
+    const inContents = (b.contents||'').toLowerCase().includes(q);
+    const inTags = (b.tags||[]).some(t=>t.toLowerCase().includes(q));
+    const inRoom = (b.room||'').toLowerCase().includes(q);
+    if (inContents || inTags || inRoom) {
+      matches.push({ box: b, idx, matchType: inContents ? 'contents' : inTags ? 'tag' : 'room' });
+    }
+  });
+  if (!matches.length) {
+    results.innerHTML = `<div class="empty-state" style="padding:24px 0;"><i class="fa-solid fa-box-open"></i><p>No boxes found containing "<strong>${q}</strong>"</p></div>`;
+    return;
+  }
+  results.innerHTML = `<p style="font-size:12px;color:var(--ink3);margin-bottom:12px;">${matches.length} box${matches.length>1?'es':''} found</p>` +
+    matches.map(m=>`
+      <div class="search-result-item">
+        <span class="search-box-badge" onclick="closeModal('modal-item-search');viewBox('${m.box.id}')">
+          <i class="fa-solid fa-box" style="font-size:11px;"></i> Box #${m.idx}
+        </span>
+        <div style="flex:1;">
+          <div style="font-weight:500;font-size:13.5px;">${m.box.room}</div>
+          <div style="font-size:12px;color:var(--ink3);">${m.box.contents||'No contents listed'}</div>
+          ${(m.box.tags||[]).length?`<div class="box-tags" style="margin-top:4px;">${m.box.tags.map(t=>`<span class="box-tag">${t}</span>`).join('')}</div>`:''}
+        </div>
+        <span class="badge ${m.box.status==='packed'?'badge-green':m.box.status==='partial'?'badge-amber':'badge-gray'}" style="flex-shrink:0;">${m.box.status==='packed'?'Packed':m.box.status==='partial'?'In progress':'Empty'}</span>
+      </div>`).join('');
+}
+
+// ===== INVENTORY =====
+let invFilter = '';
+function renderInventory() {
+  const search = document.getElementById('inv-search')?.value.toLowerCase()||'';
+  const room = document.getElementById('inv-filter-room')?.value||'';
+  const rooms = [...new Set(db.inventory.map(i=>i.room))];
+  const sel = document.getElementById('inv-filter-room');
+  if(sel) { const cur=sel.value; sel.innerHTML='<option value="">All rooms</option>'+rooms.map(r=>`<option ${r===cur?'selected':''} value="${r}">${r}</option>`).join(''); }
+  const items = db.inventory.filter(i => (!search||i.name.toLowerCase().includes(search)||(i.room||'').toLowerCase().includes(search)) && (!room||i.room===room));
+  document.getElementById('inventory-table').innerHTML = items.length ?
+    `<table><thead><tr><th>Item</th><th>Room</th><th>Qty</th><th>Condition</th><th>Action</th><th>Notes</th><th></th></tr></thead><tbody>` +
+    items.map(i=>`<tr>
+      <td><strong>${i.name}</strong></td><td>${i.room||'—'}</td><td>${i.qty||1}</td>
+      <td><span class="badge badge-gray">${i.cond||'Good'}</span></td>
+      <td><span class="badge ${i.action==='move'?'badge-blue':i.action==='donate'?'badge-teal':i.action==='sell'?'badge-amber':'badge-red'}">${i.action||'move'}</span></td>
+      <td class="text-muted text-sm">${i.notes||'—'}</td>
+      <td><button class="btn btn-ghost btn-icon btn-sm" onclick="editInvItem('${i.id}')"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteInvItem('${i.id}')"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('') + `</tbody></table>` :
+    '<div class="empty-state"><i class="fa-solid fa-clipboard-list"></i><p>No items yet.</p></div>';
+}
+function saveInventoryItem() {
+  const id = document.getElementById('item-edit-id').value;
+  const data = { name:document.getElementById('item-name').value.trim(), room:document.getElementById('item-room').value, qty:document.getElementById('item-qty').value, cond:document.getElementById('item-cond').value, action:document.getElementById('item-action').value, notes:document.getElementById('item-notes').value };
+  if(!data.name) return;
+  if(id) { Object.assign(db.inventory.find(i=>i.id===id), data); }
+  else { db.inventory.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-item'); renderInventory();
+}
+function editInvItem(id) {
+  const i = db.inventory.find(i=>i.id===id); if(!i) return;
+  document.getElementById('item-modal-title').textContent='Edit Item';
+  document.getElementById('item-edit-id').value=id;
+  document.getElementById('item-name').value=i.name;
+  document.getElementById('item-room').value=i.room||'';
+  document.getElementById('item-qty').value=i.qty||1;
+  document.getElementById('item-cond').value=i.cond||'Good';
+  document.getElementById('item-action').value=i.action||'move';
+  document.getElementById('item-notes').value=i.notes||'';
+  openModal('modal-item');
+}
+function deleteInvItem(id) {
+  if(!confirm('Delete item?')) return;
+  db.inventory=db.inventory.filter(i=>i.id!==id); saveDB(); renderInventory();
+}
+
+// ===== ADDRESSES =====
+let addrFilter = 'all';
+function saveAddresses() {
+  db.addresses.old = document.getElementById('old-addr').value;
+  db.addresses.new = document.getElementById('new-addr').value;
+  saveDB();
+}
+function filterAddr(f, el) {
+  document.querySelectorAll('#page-addresses .tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); addrFilter = f; renderAddresses();
+}
+function renderAddresses() {
+  if(db.addresses.old) document.getElementById('old-addr').value=db.addresses.old;
+  if(db.addresses.new) document.getElementById('new-addr').value=db.addresses.new;
+  const orgs = db.addresses.orgs||[];
+  const filtered = addrFilter==='all' ? orgs : orgs.filter(a=>a.status===addrFilter);
+  document.getElementById('addr-cnt-all').textContent=orgs.length;
+  document.getElementById('addr-cnt-pending').textContent=orgs.filter(a=>a.status==='pending').length;
+  document.getElementById('addr-cnt-done').textContent=orgs.filter(a=>a.status==='done').length;
+  const catIcons = {'Bank / Finance':'fa-credit-card','Government':'fa-landmark','Employer':'fa-building','NHS / Medical':'fa-heart-pulse','Insurance':'fa-shield-halved','Subscription':'fa-repeat','Utilities':'fa-bolt','Online Shopping':'fa-bag-shopping','Other':'fa-star'};
+  document.getElementById('addr-list').innerHTML = filtered.length ? filtered.map(a=>`
+    <div class="addr-org">
+      <div class="addr-icon"><i class="fa-solid ${catIcons[a.cat]||'fa-star'}"></i></div>
+      <div class="addr-body">
+        <div class="flex items-center justify-between">
+          <span class="addr-name">${a.org}</span>
+          <span class="badge ${a.status==='done'?'badge-green':'badge-amber'}">${a.status==='done'?'Done':'Pending'}</span>
+        </div>
+        <div class="addr-note">${a.cat} · ${a.how||''}${a.notes?' · '+a.notes:''}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleAddrStatus('${a.id}')">${a.status==='done'?'Mark pending':'Mark done'}</button>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="editAddrOrg('${a.id}')"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteAddrOrg('${a.id}')"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join('') :
+    '<div class="empty-state"><i class="fa-solid fa-envelope-open"></i><p>All done here!</p></div>';
+}
+function toggleAddrStatus(id) {
+  const a = (db.addresses.orgs||[]).find(a=>a.id===id); if(!a) return;
+  a.status = a.status==='done'?'pending':'done';
+  saveDB(); renderAddresses(); renderDashboard();
+}
+function saveAddrOrg() {
+  const id = document.getElementById('addr-edit-id').value;
+  const data = { org:document.getElementById('addr-org').value.trim(), cat:document.getElementById('addr-cat').value, how:document.getElementById('addr-how').value, status:document.getElementById('addr-status').value, notes:document.getElementById('addr-notes').value };
+  if(!data.org) return;
+  if(!db.addresses.orgs) db.addresses.orgs=[];
+  if(id) { Object.assign(db.addresses.orgs.find(a=>a.id===id), data); }
+  else { db.addresses.orgs.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-addr'); renderAddresses(); renderDashboard();
+}
+function editAddrOrg(id) {
+  const a = (db.addresses.orgs||[]).find(a=>a.id===id); if(!a) return;
+  document.getElementById('addr-modal-title').textContent='Edit Organisation';
+  document.getElementById('addr-edit-id').value=id;
+  document.getElementById('addr-org').value=a.org;
+  document.getElementById('addr-cat').value=a.cat;
+  document.getElementById('addr-how').value=a.how||'';
+  document.getElementById('addr-status').value=a.status;
+  document.getElementById('addr-notes').value=a.notes||'';
+  openModal('modal-addr');
+}
+function deleteAddrOrg(id) {
+  if(!confirm('Delete this organisation?')) return;
+  db.addresses.orgs=db.addresses.orgs.filter(a=>a.id!==id);
+  saveDB(); renderAddresses(); renderDashboard();
+}
+
+// ===== UTILITIES =====
+function renderUtilities() {
+  const actionMap = { transfer:'Transfer to new address', cancel:'Cancel & set up new', meter:'Take meter readings', done:'Done' };
+  const typeIcons = { Gas:'fa-fire-flame-curved', Electricity:'fa-bolt', Water:'fa-droplet', Broadband:'fa-wifi', 'TV Licence':'fa-tv', 'Council Tax':'fa-building-columns', Phone:'fa-phone', Other:'fa-circle-question' };
+  document.getElementById('utility-list').innerHTML = db.utilities.length ?
+    db.utilities.map(u=>`
+      <div class="addr-org">
+        <div class="addr-icon"><i class="fa-solid ${typeIcons[u.type]||'fa-circle-question'}"></i></div>
+        <div class="addr-body">
+          <div class="flex items-center justify-between">
+            <span class="addr-name">${u.name}</span>
+            <span class="badge ${u.action==='done'?'badge-green':'badge-amber'}">${actionMap[u.action]||u.action}</span>
+          </div>
+          <div class="addr-note">${u.type}${u.ref?' · Ref: '+u.ref:''}${u.notes?' · '+u.notes:''}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleUtilDone('${u.id}')">${u.action==='done'?'Undo':'Mark done'}</button>
+        <button class="btn btn-ghost btn-icon btn-sm" onclick="editUtility('${u.id}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteUtility('${u.id}')"><i class="fa-solid fa-trash"></i></button>
+      </div>`).join('') :
+    '<div class="empty-state"><i class="fa-solid fa-bolt"></i><p>No utilities tracked yet.</p></div>';
+}
+function toggleUtilDone(id) {
+  const u = db.utilities.find(u=>u.id===id); if(!u) return;
+  u.action = u.action==='done'?'transfer':'done';
+  saveDB(); renderUtilities();
+}
+function saveUtility() {
+  const id = document.getElementById('util-edit-id').value;
+  const data = { name:document.getElementById('util-name').value.trim(), type:document.getElementById('util-type').value, ref:document.getElementById('util-ref').value, action:document.getElementById('util-action').value, notes:document.getElementById('util-notes').value };
+  if(!data.name) return;
+  if(id) { Object.assign(db.utilities.find(u=>u.id===id), data); }
+  else { db.utilities.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-utility'); renderUtilities();
+}
+function editUtility(id) {
+  const u = db.utilities.find(u=>u.id===id); if(!u) return;
+  document.getElementById('util-modal-title').textContent='Edit Utility';
+  document.getElementById('util-edit-id').value=id;
+  document.getElementById('util-name').value=u.name;
+  document.getElementById('util-type').value=u.type;
+  document.getElementById('util-ref').value=u.ref||'';
+  document.getElementById('util-action').value=u.action;
+  document.getElementById('util-notes').value=u.notes||'';
+  openModal('modal-utility');
+}
+function deleteUtility(id) {
+  if(!confirm('Delete utility?')) return;
+  db.utilities=db.utilities.filter(u=>u.id!==id); saveDB(); renderUtilities();
+}
+
+// ===== CONTACTS =====
+function renderContacts() {
+  document.getElementById('contacts-grid').innerHTML = db.contacts.length ?
+    db.contacts.map(c=>`
+      <div class="card card-sm">
+        <div class="flex items-center gap-2" style="margin-bottom:14px;">
+          <div class="contact-avatar">${c.name.slice(0,2).toUpperCase()}</div>
+          <div><div style="font-weight:600;font-size:14px;">${c.name}</div><div class="text-sm text-muted">${c.role||''}</div></div>
+        </div>
+        ${c.phone?`<div class="text-sm" style="margin-bottom:6px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-phone" style="width:14px;color:var(--ink3);font-size:12px;"></i>${c.phone}</div>`:''}
+        ${c.email?`<div class="text-sm" style="margin-bottom:6px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-envelope" style="width:14px;color:var(--ink3);font-size:12px;"></i>${c.email}</div>`:''}
+        ${c.notes?`<div class="text-sm text-muted" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--surface2);">${c.notes}</div>`:''}
+        <div class="flex gap-2" style="margin-top:14px;">
+          <button class="btn btn-ghost btn-sm" onclick="editContact('${c.id}')"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteContact('${c.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>`).join('') :
+    '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-address-book"></i><p>No contacts yet. Add solicitor, agent, removal company etc.</p></div>';
+}
+function saveContact() {
+  const id = document.getElementById('contact-edit-id').value;
+  const data = { name:document.getElementById('c-name').value.trim(), role:document.getElementById('c-role').value, phone:document.getElementById('c-phone').value, email:document.getElementById('c-email').value, notes:document.getElementById('c-notes').value };
+  if(!data.name) return;
+  if(id) { Object.assign(db.contacts.find(c=>c.id===id), data); }
+  else { db.contacts.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-contact'); renderContacts();
+}
+function editContact(id) {
+  const c = db.contacts.find(c=>c.id===id); if(!c) return;
+  document.getElementById('contact-modal-title').textContent='Edit Contact';
+  document.getElementById('contact-edit-id').value=id;
+  document.getElementById('c-name').value=c.name;
+  document.getElementById('c-role').value=c.role||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-notes').value=c.notes||'';
+  openModal('modal-contact');
+}
+function deleteContact(id) {
+  if(!confirm('Delete contact?')) return;
+  db.contacts=db.contacts.filter(c=>c.id!==id); saveDB(); renderContacts();
+}
+
+// ===== NOTES =====
+const noteCols = { General:'badge-gray', Property:'badge-blue', Legal:'badge-teal', Packing:'badge-amber', Reminder:'badge-red' };
+function renderNotes() {
+  document.getElementById('notes-grid').innerHTML = db.notes.length ?
+    db.notes.map(n=>`
+      <div class="card" style="position:relative;">
+        <div class="flex items-center justify-between mb-2">
+          <strong style="font-size:14px;">${n.title}</strong>
+          <span class="badge ${noteCols[n.cat]||'badge-gray'}">${n.cat}</span>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink2);white-space:pre-wrap;line-height:1.6;">${n.body}</p>
+        <div class="flex gap-2 mt-2" style="margin-top:14px;">
+          <button class="btn btn-ghost btn-sm" onclick="editNote('${n.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">Delete</button>
+        </div>
+      </div>`).join('') :
+    '<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-note-sticky"></i><p>No notes yet.</p></div>';
+}
+function saveNote() {
+  const id = document.getElementById('note-edit-id').value;
+  const data = { title:document.getElementById('note-title').value.trim(), cat:document.getElementById('note-cat').value, body:document.getElementById('note-body').value };
+  if(!data.title) return;
+  if(id) { Object.assign(db.notes.find(n=>n.id===id), data); }
+  else { db.notes.push({ id:uid(), ...data }); }
+  saveDB(); closeModal('modal-note'); renderNotes();
+}
+function editNote(id) {
+  const n = db.notes.find(n=>n.id===id); if(!n) return;
+  document.getElementById('note-modal-title').textContent='Edit Note';
+  document.getElementById('note-edit-id').value=id;
+  document.getElementById('note-title').value=n.title;
+  document.getElementById('note-cat').value=n.cat;
+  document.getElementById('note-body').value=n.body;
+  openModal('modal-note');
+}
+function deleteNote(id) {
+  if(!confirm('Delete note?')) return;
+  db.notes=db.notes.filter(n=>n.id!==id); saveDB(); renderNotes();
+}
+
+// ===== RESET HELPERS =====
+function clearEditFields() {
+  ['task-edit-id','exp-edit-id','quote-edit-id','box-edit-id','item-edit-id','addr-edit-id','util-edit-id','contact-edit-id','note-edit-id'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  ['task-name','task-notes','exp-desc','exp-amount','exp-date','q-company','q-price','q-crew','q-vans','q-notes','box-room','box-contents','box-dest','item-name','item-room','item-notes','addr-org','addr-how','addr-notes','util-name','util-ref','util-notes','c-name','c-role','c-phone','c-email','c-notes','note-title','note-body'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  // Reset tag widget
+  setTagsUI([]);
+  // Reset item search
+  const si = document.getElementById('item-search-input'); if(si) si.value='';
+  const sr = document.getElementById('item-search-results'); if(sr) sr.innerHTML='<p class="text-muted text-sm" style="text-align:center;">Start typing to search across all box contents and tags.</p>';
+  document.getElementById('task-modal-title').textContent='Add Task';
+  document.getElementById('exp-modal-title').textContent='Add Expense';
+  document.getElementById('quote-modal-title').textContent='Add Removal Quote';
+  document.getElementById('box-modal-title').textContent='Add Box';
+  document.getElementById('item-modal-title').textContent='Add Item';
+  document.getElementById('addr-modal-title').textContent='Add Organisation';
+  document.getElementById('util-modal-title').textContent='Add Utility / Service';
+  document.getElementById('contact-modal-title').textContent='Add Contact';
+  document.getElementById('note-modal-title').textContent='Add Note';
+}
+
+// Override openModal to clear fields (skip for view-only modals)
+const _openModal = openModal;
+window.openModal = function(id, data) {
+  if (id !== 'modal-box-view') clearEditFields();
+  _openModal(id, data);
+  // Auto-focus search input when Find Item modal opens
+  if (id === 'modal-item-search') {
+    setTimeout(()=>{ const el=document.getElementById('item-search-input'); if(el) el.focus(); }, 80);
+  }
+};
+
+// ===== INIT =====
+loadDB();
+seedDefaults();
+loadMoveDateUI();
+renderDashboard();
+</script>
+</body>
+</html>
