@@ -102,6 +102,25 @@ h1, h2, h3, h4 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 4
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
+.sidebar-close-btn {
+  display: none;
+  margin-left: auto;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.sidebar-close-btn:active { background: rgba(255,255,255,0.12); }
+
 .sidebar-logo-inner {
   display: flex;
   align-items: center;
@@ -253,7 +272,10 @@ h1, h2, h3, h4 { font-family: 'Instrument Serif', Georgia, serif; font-weight: 4
   letter-spacing: -0.3px;
 }
 
-.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.topbar-left .topbar-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
 
 .content { padding: 28px 32px; }
 
@@ -994,7 +1016,10 @@ tbody tr:hover td { background: var(--surface); }
   font-size: 16px;
   color: var(--ink2);
   flex-shrink: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
+.hamburger:active { background: var(--surface2); transform: scale(0.96); }
 
 /* ── BOTTOM NAV (mobile only) ── */
 .bottom-nav {
@@ -1070,27 +1095,50 @@ tbody tr:hover td { background: var(--surface); }
 }
 
 @media (max-width: 640px) {
+  /* Body lock when drawer is open */
+  body.drawer-open { overflow: hidden; }
+
   /* Sidebar becomes a slide-in drawer */
   .sidebar {
     width: 280px;
     transform: translateX(-100%);
     transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-    z-index: 100;
+    z-index: 200;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .sidebar.open { transform: translateX(0); }
-  .drawer-overlay { display: block; pointer-events: none; }
+  .sidebar-close-btn { display: flex; }
+
+  .drawer-overlay {
+    display: block;
+    pointer-events: none;
+    z-index: 150;
+  }
   .drawer-overlay.open { pointer-events: all; }
 
   /* Main takes full width */
   .main { margin-left: 0; padding-bottom: 70px; }
 
   /* Topbar adjustments */
-  .topbar { padding: 0 14px; height: 56px; }
-  .topbar-title { font-size: 19px; }
+  .topbar { padding: 0 12px; height: 56px; }
+  .topbar-title { font-size: 17px; }
   .hamburger { display: flex; }
 
+  /* Hide subtitle button text on mobile, keep icon */
+  .topbar-actions .btn span { display: none; }
+  .topbar-actions { gap: 6px; }
+  .topbar-actions .btn { padding: 8px 11px; }
+  .topbar-actions .btn-sm { padding: 7px 10px; }
+
+  /* Hide secondary span text from move date display */
+  #move-date-display { display: none; }
+  #box-count-display { display: none; }
+
   /* Content padding */
-  .content { padding: 16px 14px; }
+  .content { padding: 14px 12px; }
 
   /* Grids go single column */
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
@@ -1099,10 +1147,9 @@ tbody tr:hover td { background: var(--surface); }
   .bottom-nav { display: block; }
 
   /* Tabs scroll horizontally */
-  .tabs { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+  .tabs { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .tab { white-space: nowrap; flex-shrink: 0; }
 
-  /* Topbar actions — hide text labels on small screens */
-  .topbar-actions .btn span { display: none; }
   .section-header { flex-wrap: wrap; gap: 8px; }
 
   /* Modals full-screen on mobile */
@@ -1114,6 +1161,11 @@ tbody tr:hover td { background: var(--surface); }
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
   .modal-overlay { align-items: flex-end; }
+
+  /* Smaller cards on mobile */
+  .card { padding: 18px 16px; }
+  .stat-card { padding: 16px 18px; }
+  .stat-value { font-size: 24px; }
 }
 </style>
 </head>
@@ -1131,7 +1183,7 @@ tbody tr:hover td { background: var(--surface); }
           <h1>MovePlan</h1>
           <p>Your move, organised</p>
         </div>
-        <button onclick="closeSidebar()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.35);font-size:18px;cursor:pointer;padding:4px;display:none;" id="sidebar-close"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeSidebar()" class="sidebar-close-btn" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
     <nav class="nav">
@@ -1175,9 +1227,9 @@ tbody tr:hover td { background: var(--surface); }
     <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
       <div class="topbar">
-        <div class="flex items-center gap-2">
-          <div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div>
-          <span class="topbar-title">Dashboard</span></div>
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Dashboard</span>
         </div>
         <div class="topbar-actions">
           <span class="text-muted text-sm" id="move-date-display"></span>
@@ -1211,8 +1263,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- CHECKLIST -->
     <div id="page-checklist" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Master Checklist</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-task')"><i class="fa-solid fa-plus"></i> Add Task</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Master Checklist</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-task')"><i class="fa-solid fa-plus"></i> <span>Add Task</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="tabs">
@@ -1229,7 +1287,12 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- TIMELINE -->
     <div id="page-timeline" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Move Timeline</span></div></div>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Move Timeline</span>
+        </div>
+      </div>
       <div class="content">
         <div class="grid-2">
           <div class="card"><div id="timeline-content"></div></div>
@@ -1243,8 +1306,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- BUDGET -->
     <div id="page-budget" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Budget Tracker</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-expense')"><i class="fa-solid fa-plus"></i> Add Expense</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Budget Tracker</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-expense')"><i class="fa-solid fa-plus"></i> <span>Add Expense</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="grid-3 mb-2">
@@ -1272,8 +1341,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- QUOTES -->
     <div id="page-quotes" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Removal Quotes</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-quote')"><i class="fa-solid fa-plus"></i> Add Quote</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Removal Quotes</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-quote')"><i class="fa-solid fa-plus"></i> <span>Add Quote</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="card mb-2">
@@ -1285,11 +1360,15 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- BOXES -->
     <div id="page-boxes" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Box Tracker</span>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Box Tracker</span>
+        </div>
         <div class="topbar-actions">
           <span class="text-muted text-sm" id="box-count-display"></span>
-          <button class="btn btn-secondary" onclick="openModal('modal-item-search')"><i class="fa-solid fa-magnifying-glass"></i> Find Item</button>
-          <button class="btn btn-primary" onclick="openModal('modal-box')"><i class="fa-solid fa-plus"></i> Add Box</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modal-item-search')"><i class="fa-solid fa-magnifying-glass"></i> <span>Find Item</span></button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-box')"><i class="fa-solid fa-plus"></i> <span>Add Box</span></button>
         </div>
       </div>
       <div class="content">
@@ -1311,8 +1390,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- INVENTORY -->
     <div id="page-inventory" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Inventory</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-item')"><i class="fa-solid fa-plus"></i> Add Item</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Inventory</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-item')"><i class="fa-solid fa-plus"></i> <span>Add Item</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="card">
@@ -1330,8 +1415,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- ADDRESSES -->
     <div id="page-addresses" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Address Changes</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-addr')"><i class="fa-solid fa-plus"></i> Add Organisation</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Address Changes</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-addr')"><i class="fa-solid fa-plus"></i> <span>Add Organisation</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="card mb-2">
@@ -1358,8 +1449,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- UTILITIES -->
     <div id="page-utilities" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Utilities & Services</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-utility')"><i class="fa-solid fa-plus"></i> Add Utility</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Utilities &amp; Services</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-utility')"><i class="fa-solid fa-plus"></i> <span>Add Utility</span></button>
+        </div>
       </div>
       <div class="content">
         <div class="card"><div id="utility-list"></div></div>
@@ -1368,8 +1465,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- CONTACTS -->
     <div id="page-contacts" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Key Contacts</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-contact')"><i class="fa-solid fa-plus"></i> Add Contact</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Key Contacts</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-contact')"><i class="fa-solid fa-plus"></i> <span>Add Contact</span></button>
+        </div>
       </div>
       <div class="content">
         <div id="contacts-grid" class="grid-3"></div>
@@ -1378,8 +1481,14 @@ tbody tr:hover td { background: var(--surface); }
 
     <!-- NOTES -->
     <div id="page-notes" class="page">
-      <div class="topbar"><div class="flex items-center gap-2"><div class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div><span class="topbar-title">Notes</span></div>
-        <button class="btn btn-primary" onclick="openModal('modal-note')"><i class="fa-solid fa-plus"></i> Add Note</button>
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="openSidebar()" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="topbar-title">Notes</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-note')"><i class="fa-solid fa-plus"></i> <span>Add Note</span></button>
+        </div>
       </div>
       <div class="content">
         <div id="notes-grid" class="grid-3"></div>
@@ -1866,7 +1975,10 @@ function showPage(id) {
   const bn = document.getElementById('bn-'+id);
   if (bn) bn.classList.add('active');
   else { const more = document.getElementById('bn-more'); if(more) more.classList.add('active'); }
+  // Close sidebar drawer on mobile
   closeSidebar();
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'instant' });
   renderPage(id);
 }
 function renderPage(id) {
@@ -2857,34 +2969,29 @@ window.openModal = function(id, data) {
 function openSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('drawer-overlay');
-  const cl = document.getElementById('sidebar-close');
   sb.classList.add('open');
   ov.classList.add('open');
-  if (cl) cl.style.display = 'block';
+  document.body.classList.add('drawer-open');
 }
 function closeSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('drawer-overlay');
-  const cl = document.getElementById('sidebar-close');
   sb.classList.remove('open');
   ov.classList.remove('open');
-  if (cl) cl.style.display = 'none';
+  document.body.classList.remove('drawer-open');
 }
 
 const BN_MAIN = ['dashboard','checklist','boxes','budget'];
 function setBnActive(id) {
-  // Update bottom nav active state
   document.querySelectorAll('.bn-item').forEach(el => el.classList.remove('active'));
   const target = document.getElementById('bn-' + id) || document.getElementById('bn-more');
   if (target) target.classList.add('active');
-  // Update more menu items
   document.querySelectorAll('.bn-more-item').forEach(el => el.classList.remove('active'));
   if (!BN_MAIN.includes(id)) {
     document.querySelectorAll('.bn-more-item').forEach(el => {
       if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'"+id+"'")) el.classList.add('active');
     });
   }
-  closeSidebar();
 }
 
 function toggleMoreMenu() {
@@ -2895,19 +3002,10 @@ function closeMoreMenu() {
   document.getElementById('bn-more-menu').classList.remove('open');
 }
 
-// Close more menu when tapping elsewhere
 document.addEventListener('click', (e) => {
   const more = document.getElementById('bn-more');
   if (more && !more.contains(e.target)) closeMoreMenu();
 });
-
-// Show sidebar close button on mobile
-function checkMobile() {
-  const cl = document.getElementById('sidebar-close');
-  if (cl) cl.style.display = window.innerWidth <= 640 ? 'block' : 'none';
-}
-window.addEventListener('resize', checkMobile);
-checkMobile();
 
 // ===== INIT =====
 (async () => {
