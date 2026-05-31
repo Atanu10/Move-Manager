@@ -967,6 +967,8 @@ tbody tr:hover td { background: var(--surface); }
   align-self: stretch;
 }
 
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .sidebar { width: 220px; }
@@ -1016,6 +1018,19 @@ tbody tr:hover td { background: var(--surface); }
     <div class="sidebar-progress">
       <div class="prog-label">Overall progress <span id="overall-pct">0%</span></div>
       <div class="prog-bar"><div class="prog-fill" id="overall-fill" style="width:0%"></div></div>
+      <div id="sync-status" style="display:flex;align-items:center;gap:6px;margin-top:12px;font-size:11px;font-family:'Inter',sans-serif;">
+        <i class="fa-solid fa-rotate" style="font-size:11px;color:#f59e0b;animation:spin 1s linear infinite;"></i>
+        <span style="color:#f59e0b;">Connecting…</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="exportJSON()" style="flex:1;font-size:11px;padding:6px 8px;color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1);background:transparent;" title="Download backup JSON">
+          <i class="fa-solid fa-download"></i> Export
+        </button>
+        <label class="btn btn-ghost btn-sm" style="flex:1;font-size:11px;padding:6px 8px;color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1);background:transparent;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" title="Restore from JSON backup">
+          <i class="fa-solid fa-upload"></i> Import
+          <input type="file" accept=".json" onchange="importJSON(event)" style="display:none;">
+        </label>
+      </div>
     </div>
   </aside>
 
@@ -1549,8 +1564,28 @@ tbody tr:hover td { background: var(--surface); }
 </div>
 
 <script>
-// ===== DB =====
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://cmwuqxvzplpgxvewjyxg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtd3VxeHZ6cGxwZ3h2ZXdqeXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzkxMDQsImV4cCI6MjA5NTgxNTEwNH0.oF-lJa4-lNQV8mohrRXh9iwdKGq5wVslcE-6Z-VuUXU';
 const DB_KEY = 'moveplan_v2';
+let _saveTimer = null;
+
+// ===== SYNC STATUS =====
+function setSyncStatus(state) {
+  // states: 'saved' | 'saving' | 'error' | 'offline'
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const cfg = {
+    saved:   { icon: 'fa-cloud-arrow-up', text: 'Saved',   color: '#10b981' },
+    saving:  { icon: 'fa-rotate',         text: 'Saving…', color: '#f59e0b' },
+    error:   { icon: 'fa-cloud-slash',    text: 'Offline — local only', color: '#f43f5e' },
+    offline: { icon: 'fa-cloud-slash',    text: 'Offline — local only', color: '#f43f5e' },
+  };
+  const c = cfg[state] || cfg.saved;
+  el.innerHTML = `<i class="fa-solid ${c.icon}" style="font-size:11px;color:${c.color};${state==='saving'?'animation:spin 1s linear infinite;':''}"></i><span style="color:${c.color};">${c.text}</span>`;
+}
+
+// ===== DB =====
 let db = {
   moveDate: '', fromAddr: '', toAddr: '',
   tasks: [], expenses: [], budgetTotal: 5000,
@@ -1560,11 +1595,93 @@ let db = {
   selectedQuote: null
 };
 
-function loadDB() {
-  try { const s = localStorage.getItem(DB_KEY); if (s) db = { ...db, ...JSON.parse(s) }; } catch(e) {}
+async function loadDB() {
+  // Always load local first for instant render
+  try {
+    const s = localStorage.getItem(DB_KEY);
+    if (s) db = { ...db, ...JSON.parse(s) };
+  } catch(e) {}
+
+  // Then fetch from Supabase and merge (cloud wins)
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/moveplan?id=eq.main&select=data`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (res.ok) {
+      const rows = await res.json();
+      if (rows.length && rows[0].data && Object.keys(rows[0].data).length > 0) {
+        db = { ...db, ...rows[0].data };
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+      }
+      setSyncStatus('saved');
+    } else {
+      setSyncStatus('error');
+    }
+  } catch(e) {
+    setSyncStatus('offline');
+  }
 }
-function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+async function pushToDB() {
+  setSyncStatus('saving');
+  // Always keep local in sync
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/moveplan`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ id: 'main', data: db, updated_at: new Date().toISOString() })
+    });
+    setSyncStatus(res.ok ? 'saved' : 'error');
+  } catch(e) {
+    setSyncStatus('offline');
+  }
+}
+
+function saveDB() {
+  // Debounce — wait 800ms after last change before pushing
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  setSyncStatus('saving');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(pushToDB, 800);
+}
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ===== EXPORT / IMPORT =====
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `moveplan-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      db = { ...db, ...imported };
+      await pushToDB();
+      renderDashboard();
+      alert('Import successful! Your data has been restored.');
+    } catch(err) {
+      alert('Could not read file. Make sure it is a valid MovePlan backup JSON.');
+    }
+  };
+  reader.readAsText(file);
+}
 
 // ===== NAV =====
 function showPage(id) {
@@ -2465,10 +2582,18 @@ window.openModal = function(id, data) {
 };
 
 // ===== INIT =====
-loadDB();
-seedDefaults();
-loadMoveDateUI();
-renderDashboard();
+(async () => {
+  // Render instantly from localStorage while cloud loads
+  try { const s = localStorage.getItem(DB_KEY); if(s) db = {...db,...JSON.parse(s)}; } catch(e) {}
+  seedDefaults();
+  loadMoveDateUI();
+  renderDashboard();
+  // Now fetch from Supabase and refresh
+  await loadDB();
+  seedDefaults();
+  loadMoveDateUI();
+  renderDashboard();
+})();
 </script>
 </body>
 </html>
