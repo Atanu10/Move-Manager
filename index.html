@@ -1670,6 +1670,8 @@ tbody tr:hover td { background: var(--surface); }
       <div class="form-group"><label>Destination room (new home)</label><input type="text" id="box-dest" placeholder="Where should this go at new address?"></div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-danger" id="box-delete-btn" onclick="deleteBoxFromEdit()" style="display:none;"><i class="fa-solid fa-trash"></i> Delete</button>
+      <div style="flex:1;"></div>
       <button class="btn btn-secondary" onclick="closeModal('modal-box')">Cancel</button>
       <button class="btn btn-primary" onclick="saveBox()">Save Box</button>
     </div>
@@ -2340,6 +2342,7 @@ function saveTask() {
 
 function editTask(id) {
   const t = db.tasks.find(t=>t.id===id); if(!t) return;
+  window._editingNow = true;
   document.getElementById('task-modal-title').textContent = 'Edit Task';
   document.getElementById('task-edit-id').value = id;
   document.getElementById('task-name').value = t.name;
@@ -2433,6 +2436,7 @@ function saveExpense() {
 }
 function editExpense(id) {
   const e = db.expenses.find(e=>e.id===id); if(!e) return;
+  window._editingNow = true;
   document.getElementById('exp-modal-title').textContent = 'Edit Expense';
   document.getElementById('exp-edit-id').value = id;
   document.getElementById('exp-desc').value = e.desc;
@@ -2491,6 +2495,7 @@ function saveQuote() {
 }
 function editQuote(id) {
   const q = db.quotes.find(q=>q.id===id); if(!q) return;
+  window._editingNow = true;
   document.getElementById('quote-modal-title').textContent='Edit Quote';
   document.getElementById('quote-edit-id').value=id;
   document.getElementById('q-company').value=q.company;
@@ -2608,15 +2613,26 @@ function viewBox(id) {
       <tr><td style="color:var(--ink3);padding:8px 0;">Destination</td><td>${b.dest||'—'}</td></tr>
     </table>`;
   document.getElementById('bv-footer').innerHTML = `
+    <button class="btn btn-danger" onclick="deleteBox('${id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+    <div style="flex:1;"></div>
     <button class="btn btn-secondary" onclick="closeModal('modal-box-view')">Close</button>
-    <button class="btn btn-ghost" onclick="editBox('${id}');closeModal('modal-box-view')">Edit</button>
-    <button class="btn btn-primary" onclick="markBoxPacked('${id}');closeModal('modal-box-view')">${b.status==='packed'?'Mark unpacked':'Mark packed'}</button>`;
+    <button class="btn btn-ghost" onclick="editBox('${id}');closeModal('modal-box-view')"><i class="fa-solid fa-pen"></i> Edit</button>
+    <button class="btn btn-primary" onclick="markBoxPacked('${id}');closeModal('modal-box-view')"><i class="fa-solid fa-check"></i> ${b.status==='packed'?'Mark unpacked':'Mark packed'}</button>`;
   openModal('modal-box-view');
 }
 function markBoxPacked(id) {
   const b = db.boxes.find(b=>b.id===id); if(!b) return;
   b.status = b.status==='packed'?'partial':'packed';
   saveDB(); renderBoxes();
+}
+function deleteBox(id) {
+  const b = db.boxes.find(b=>b.id===id); if(!b) return;
+  const idx = db.boxes.indexOf(b)+1;
+  if (!confirm(`Delete Box #${idx} (${b.room})?\n\nThis cannot be undone.`)) return;
+  db.boxes = db.boxes.filter(b => b.id !== id);
+  saveDB();
+  closeModal('modal-box-view');
+  renderBoxes();
 }
 function saveBox() {
   const id = document.getElementById('box-edit-id').value;
@@ -2638,6 +2654,7 @@ function saveBox() {
 }
 function editBox(id) {
   const b = db.boxes.find(b=>b.id===id); if(!b) return;
+  window._editingNow = true;
   document.getElementById('box-modal-title').textContent='Edit Box';
   document.getElementById('box-edit-id').value=id;
   document.getElementById('box-room').value=b.room;
@@ -2647,7 +2664,15 @@ function editBox(id) {
   document.getElementById('box-status').value=b.status;
   document.getElementById('box-dest').value=b.dest||'';
   setTagsUI(b.tags||[]);
+  document.getElementById('box-delete-btn').style.display = 'inline-flex';
   openModal('modal-box');
+}
+
+function deleteBoxFromEdit() {
+  const id = document.getElementById('box-edit-id').value;
+  if (!id) return;
+  closeModal('modal-box');
+  deleteBox(id);
 }
 
 // --- Find Item in Box ---
@@ -2715,6 +2740,7 @@ function saveInventoryItem() {
 }
 function editInvItem(id) {
   const i = db.inventory.find(i=>i.id===id); if(!i) return;
+  window._editingNow = true;
   document.getElementById('item-modal-title').textContent='Edit Item';
   document.getElementById('item-edit-id').value=id;
   document.getElementById('item-name').value=i.name;
@@ -2782,6 +2808,7 @@ function saveAddrOrg() {
 }
 function editAddrOrg(id) {
   const a = (db.addresses.orgs||[]).find(a=>a.id===id); if(!a) return;
+  window._editingNow = true;
   document.getElementById('addr-modal-title').textContent='Edit Organisation';
   document.getElementById('addr-edit-id').value=id;
   document.getElementById('addr-org').value=a.org;
@@ -2833,6 +2860,7 @@ function saveUtility() {
 }
 function editUtility(id) {
   const u = db.utilities.find(u=>u.id===id); if(!u) return;
+  window._editingNow = true;
   document.getElementById('util-modal-title').textContent='Edit Utility';
   document.getElementById('util-edit-id').value=id;
   document.getElementById('util-name').value=u.name;
@@ -2876,6 +2904,7 @@ function saveContact() {
 }
 function editContact(id) {
   const c = db.contacts.find(c=>c.id===id); if(!c) return;
+  window._editingNow = true;
   document.getElementById('contact-modal-title').textContent='Edit Contact';
   document.getElementById('contact-edit-id').value=id;
   document.getElementById('c-name').value=c.name;
@@ -2918,6 +2947,7 @@ function saveNote() {
 }
 function editNote(id) {
   const n = db.notes.find(n=>n.id===id); if(!n) return;
+  window._editingNow = true;
   document.getElementById('note-modal-title').textContent='Edit Note';
   document.getElementById('note-edit-id').value=id;
   document.getElementById('note-title').value=n.title;
@@ -2952,14 +2982,24 @@ function clearEditFields() {
   document.getElementById('util-modal-title').textContent='Add Utility / Service';
   document.getElementById('contact-modal-title').textContent='Add Contact';
   document.getElementById('note-modal-title').textContent='Add Note';
+  // Hide box-delete button (only shown when editing)
+  const delBtn = document.getElementById('box-delete-btn');
+  if (delBtn) delBtn.style.display = 'none';
 }
 
-// Override openModal to clear fields (skip for view-only modals)
+// Override openModal to clear fields ONLY when opening for "Add" (no edit-id set)
 const _openModal = openModal;
 window.openModal = function(id, data) {
-  if (id !== 'modal-box-view') clearEditFields();
+  // Skip clearing for view-only modals
+  if (id === 'modal-box-view') {
+    _openModal(id, data);
+    return;
+  }
+  // If we're being called from an edit function, the edit-id will be set BEFORE openModal.
+  // We use a flag to distinguish edit vs add calls.
+  if (!window._editingNow) clearEditFields();
+  window._editingNow = false;
   _openModal(id, data);
-  // Auto-focus search input when Find Item modal opens
   if (id === 'modal-item-search') {
     setTimeout(()=>{ const el=document.getElementById('item-search-input'); if(el) el.focus(); }, 80);
   }
